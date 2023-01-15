@@ -10,9 +10,29 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model user {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    name      String
+model User {
+    id         String    @id @default(cuid())
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+    playerName String
+    charName   String
+    roomId     String
+    room       Room      @relation(fields: [roomId], references: [id])
+    dieRolls   dieRoll[]
+}
+
+model Room {
+    id       String    @id @default(cuid())
+    name     String
+    players  User[]
+    dieRolls dieRoll[]
+}
+
+model dieRoll {
+    id      String @id @default(cuid())
+    outcome String
+    userId  String
+    user    User   @relation(fields: [userId], references: [id])
+    roomId  String
+    room    Room   @relation(fields: [roomId], references: [id])
 }
