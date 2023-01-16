@@ -35,7 +35,7 @@ export const roomRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const room: Room = await ctx.prisma.room.upsert({
+      return await ctx.prisma.room.upsert({
         where: {
           name: input.name,
         },
@@ -44,8 +44,6 @@ export const roomRouter = createTRPCRouter({
         },
         update: {},
       });
-
-      return { msg: `room: ${room.id}` };
     }),
   findRoom: publicProcedure
     .input(

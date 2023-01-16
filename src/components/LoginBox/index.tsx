@@ -1,3 +1,4 @@
+import { Room } from "@prisma/client";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { trpc } from "../../utils/api";
@@ -8,10 +9,11 @@ export default function LoginBox(props: ILoginBoxProps) {
   const utils = trpc.useContext();
 
   const [roomName, setRoomName] = useState("");
+  const [room, setRoom] = useState<Room | undefined>();
 
-  const { data: rooms, isLoading: roomsLoading } = trpc.room.getAll.useQuery();
   const { mutate: addRoom } = trpc.room.add.useMutation({
-    onSuccess: () => {
+    onSuccess(data) {
+      setRoom(data);
       utils.room.findRoom.invalidate();
     },
   });
