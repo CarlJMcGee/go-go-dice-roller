@@ -1,8 +1,9 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import LoginBox from "../components/LoginBox";
 
-import { api } from "../utils/api";
+import { trpc } from "../utils/api";
 
 const Home: NextPage = () => {
   return (
@@ -12,7 +13,9 @@ const Home: NextPage = () => {
         <meta name="description" content="The Best Dice Roller in the Game" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex justify-center"></main>
+      <main className="flex justify-center">
+        <LoginBox />
+      </main>
     </>
   );
 };

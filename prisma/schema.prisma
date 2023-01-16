@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+    previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -18,17 +19,17 @@ model User {
     charName   String
     roomId     String
     room       Room      @relation(fields: [roomId], references: [id])
-    dieRolls   dieRoll[]
+    dieRolls   DieRoll[]
 }
 
 model Room {
     id       String    @id @default(cuid())
     name     String    @unique
     players  User[]
-    dieRolls dieRoll[]
+    dieRolls DieRoll[]
 }
 
-model dieRoll {
+model DieRoll {
     id      String @id @default(cuid())
     outcome String
     userId  String

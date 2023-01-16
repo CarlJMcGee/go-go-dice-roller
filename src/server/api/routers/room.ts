@@ -34,7 +34,7 @@ export const roomRouter = createTRPCRouter({
         name: z.string(),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const room: Room = await ctx.prisma.room.upsert({
         where: {
           name: input.name,
@@ -46,5 +46,23 @@ export const roomRouter = createTRPCRouter({
       });
 
       return { msg: `room: ${room.id}` };
+    }),
+  findRoom: publicProcedure
+    .input(
+      z.object({
+        search: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.room.findMany({
+        where: {
+          name: {
+            startsWith: input.search,
+          },
+        },
+        include: {
+          players: true,
+        },
+      });
     }),
 });
