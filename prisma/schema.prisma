@@ -14,7 +14,7 @@ model User {
     id         String    @id @default(cuid())
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
-    playerName String
+    playerName String    @unique
     charName   String
     roomId     String
     room       Room      @relation(fields: [roomId], references: [id])
@@ -23,7 +23,7 @@ model User {
 
 model Room {
     id       String    @id @default(cuid())
-    name     String
+    name     String    @unique
     players  User[]
     dieRolls dieRoll[]
 }

@@ -1,10 +1,11 @@
+import { User } from "@prisma/client";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.user.findMany({
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.prisma.user.findMany({
       orderBy: {
         charName: "asc",
       },
@@ -20,8 +21,8 @@ export const userRouter = createTRPCRouter({
         roomId: z.string(),
       })
     )
-    .query(({ ctx, input }) => {
-      return ctx.prisma.user.findMany({
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.user.findMany({
         where: {
           roomId: input.roomId,
         },
@@ -42,14 +43,16 @@ export const userRouter = createTRPCRouter({
         roomId: z.string(),
       })
     )
-    .mutation(({ ctx, input }) => {
-      const newUser = ctx.prisma.user.create({
+    .mutation(async ({ ctx, input }) => {
+      const newUser: User = await ctx.prisma.user.create({
         data: {
           ...input,
         },
       });
 
-      return newUser;
+      return {
+        msg: `player ${newUser.playerName} added ${newUser.charName} to room #: ${newUser.roomId}`,
+      };
     }),
   getOne: publicProcedure
     .input(
@@ -57,8 +60,8 @@ export const userRouter = createTRPCRouter({
         charName: z.string(),
       })
     )
-    .query(({ ctx, input }) => {
-      return ctx.prisma.user.findFirstOrThrow({
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.user.findFirstOrThrow({
         where: {
           charName: input.charName,
         },
