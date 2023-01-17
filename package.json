@@ -10,6 +10,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@carljmcgee/set-map-plus": "^1.0.1",
     "@emotion/react": "^11.10.5",
     "@emotion/server": "^11.10.0",
     "@mantine/core": "^5.10.0",
