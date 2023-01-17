@@ -3,8 +3,8 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
 import { trpc } from "../../../../utils/api";
-// import { useDiceSet } from "go-dice-react";
-import { useGenesysResult } from "go-dice-genesys-hooks";
+import { useDiceSet } from "../../../../utils/go-dice-react";
+import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 
 const RoomSession: NextPage = () => {
@@ -25,7 +25,7 @@ const RoomSession: NextPage = () => {
   });
 
   // go dice
-  // const [dice, requestDie] = useDiceSet();
+  const [dice, requestDie] = useDiceSet();
 
   if (roomLoading || userLoading) {
     return (
@@ -50,14 +50,14 @@ const RoomSession: NextPage = () => {
           <li>{roll.outcome}</li>
         ))}
       </ol>
-      {/* <button onClick={() => requestDie()}>Add Die</button>
+      <button onClick={() => requestDie()}>Add Die</button>
       {dice.length > 0 && (
         <ol>
           {dice.map((die) => (
             <li>{die.id}</li>
           ))}
         </ol>
-      )} */}
+      )}
     </div>
   );
 };
