@@ -13,7 +13,7 @@ const Home: NextPage = () => {
         <meta name="description" content="The Best Dice Roller in the Game" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex justify-center">
+      <main className="flex h-screen items-center justify-center">
         <LoginBox />
       </main>
     </>

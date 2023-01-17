@@ -1,19 +1,24 @@
-import { Room } from "@prisma/client";
+import { Autocomplete, Input } from "@mantine/core";
+import { useForm } from "@mantine/form";
+import type { Room, User } from "@prisma/client";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { trpc } from "../../utils/api";
 
-export interface ILoginBoxProps {}
-
-export default function LoginBox(props: ILoginBoxProps) {
+export default function LoginBox() {
   const utils = trpc.useContext();
 
+  // state
   const [roomName, setRoomName] = useState("");
   const [room, setRoom] = useState<Room | undefined>();
+  const [character, setChar] = useState<User | undefined>();
+  const [characters, setCharacters] = useState<User[] | undefined>();
 
+  // queries & mutations
   const { mutate: addRoom } = trpc.room.add.useMutation({
     onSuccess(data) {
       setRoom(data);
+      setCharacters(data.players);
       utils.room.findRoom.invalidate();
     },
   });
@@ -22,33 +27,137 @@ export default function LoginBox(props: ILoginBoxProps) {
     isLoading: searchResLoading,
     refetch,
   } = trpc.room.findRoom.useQuery({ search: roomName });
+  const { mutate: addCharacter } = trpc.user.add.useMutation({
+    onSuccess(data) {
+      setChar(data);
+    },
+  });
 
+  // handlers
   const addRoomHandler = (e: React.FormEvent) => {
     e.preventDefault();
 
     addRoom({ name: roomName });
-    setRoomName("");
+  };
+  const addCharHandler = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!room) {
+      return;
+    }
+
+    addCharacter({ ...playerForm.values, roomId: room.id });
   };
 
+  // mantine form
+  const playerForm = useForm({
+    initialValues: {
+      playerName: "",
+      charName: "",
+    },
+    validate: {
+      playerName: (value) => (value ? null : `Must provide a Player Name`),
+      charName: (value) => (value ? null : `Must provide a Character Name`),
+    },
+  });
+
   useEffect(() => {
-    console.log(searchRes);
-  }, [searchRes]);
+    console.log(room);
+    console.log(character);
+  }, [room, character]);
+
+  useEffect(() => {
+    if (!characters) {
+      return;
+    }
+    playerForm.setFieldValue(
+      "playerName",
+      characters?.find(
+        (player) => player.charName === playerForm.values.charName
+      )?.playerName!
+    );
+  }, [playerForm.values.charName]);
 
   return (
-    <div className="m-4">
-      <form onSubmit={addRoomHandler}>
-        <input
-          type="text"
-          value={roomName}
-          placeholder="Room Name"
-          className="bg-gray-200"
-          onChange={(e) => {
-            setRoomName(e.target.value);
-            refetch();
-          }}
-        />
-      </form>
-      {searchRes ? searchRes.map((room) => <h3>{room.name}</h3>) : null}
+    <div className="h-1/2 w-2/6 bg-slate-400">
+      <h3 className="my-3 text-center text-3xl text-white underline">
+        Login to Session
+      </h3>
+      <div className="flex flex-col items-center">
+        <form
+          onSubmit={addRoomHandler}
+          className="m-4 flex w-1/2 flex-col justify-center"
+        >
+          <Autocomplete
+            className={`${room ? "border-2 border-green-500" : ""}`}
+            type="text"
+            value={roomName}
+            data={searchRes?.map((room) => room.name) ?? []}
+            placeholder="Room Name"
+            onChange={(e) => {
+              setRoomName(e);
+              refetch();
+            }}
+          />
+          <button
+            type="submit"
+            className="mt-2 w-1/2 self-center rounded-md bg-teal-500 p-1 text-center hover:bg-teal-300"
+          >
+            Set Room
+          </button>
+        </form>
+        <form
+          className="m-4 flex w-1/2 flex-col justify-center"
+          onSubmit={addCharHandler}
+        >
+          {room ? (
+            <Autocomplete
+              className={`my-4 ${character ? "border-2 border-green-500" : ""}`}
+              type={"text"}
+              data={characters?.map((player) => player.charName) ?? [""]}
+              placeholder="Character Name"
+              {...playerForm.getInputProps("charName")}
+            />
+          ) : (
+            <Autocomplete
+              className="my-4"
+              disabled
+              type={"text"}
+              data={[""]}
+              placeholder="Character Name"
+            />
+          )}
+          {room ? (
+            <Autocomplete
+              className={`my-4 ${character ? "border-2 border-green-500" : ""}`}
+              type={"text"}
+              data={characters?.map((player) => player.playerName) ?? [""]}
+              placeholder="Player Name"
+              {...playerForm.getInputProps("playerName")}
+            />
+          ) : (
+            <Autocomplete
+              className="my-4"
+              disabled
+              type={"text"}
+              data={[""]}
+              placeholder="Player Name"
+            />
+          )}
+          <button
+            type="submit"
+            className="mt-2 w-1/2 self-center rounded-md bg-teal-500 p-1 text-center hover:bg-teal-300"
+          >
+            Set Character
+          </button>
+        </form>
+        <button
+          type="button"
+          className="mt-2 w-1/2 self-center rounded-md bg-teal-500 p-1 text-center hover:bg-teal-300"
+        >
+          Enter Room
+        </button>
+      </div>
     </div>
   );
 }

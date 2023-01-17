@@ -44,15 +44,15 @@ export const userRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const newUser: User = await ctx.prisma.user.create({
-        data: {
+      return await ctx.prisma.user.upsert({
+        where: {
+          charName: input.charName,
+        },
+        create: {
           ...input,
         },
+        update: {},
       });
-
-      return {
-        msg: `player ${newUser.playerName} added ${newUser.charName} to room #: ${newUser.roomId}`,
-      };
     }),
   getOne: publicProcedure
     .input(

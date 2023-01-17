@@ -43,6 +43,9 @@ export const roomRouter = createTRPCRouter({
           name: input.name,
         },
         update: {},
+        include: {
+          players: true,
+        },
       });
     }),
   findRoom: publicProcedure
