@@ -1,6 +1,7 @@
 import { Autocomplete, Input } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import type { Room, User } from "@prisma/client";
+import Link from "next/link";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { trpc } from "../../utils/api";
@@ -151,12 +152,14 @@ export default function LoginBox() {
             Set Character
           </button>
         </form>
-        <button
-          type="button"
-          className="mt-2 w-1/2 self-center rounded-md bg-teal-500 p-1 text-center hover:bg-teal-300"
-        >
-          Enter Room
-        </button>
+        {room && character ? (
+          <Link
+            href={`/rooms/${room?.id}/${character?.id}`}
+            className="mt-2 w-1/2 self-center rounded-md bg-teal-500 p-1 text-center hover:bg-teal-300"
+          >
+            <button type="button">Enter Room</button>
+          </Link>
+        ) : null}
       </div>
     </div>
   );
