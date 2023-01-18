@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.tableTex {
+  background-image: url("../../public/realistic-wood-texture-background_87521-3153.webp");
+}
