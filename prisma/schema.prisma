@@ -15,6 +15,7 @@ model User {
     id         String    @id @default(cuid())
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
+    loggedIn   Boolean   @default(false)
     playerName String
     charName   String    @unique
     roomId     String

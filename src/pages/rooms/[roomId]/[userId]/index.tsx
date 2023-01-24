@@ -8,6 +8,9 @@ import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 import DieDisplay from "../../../../components/DieDisplay";
 import type { DiceType } from "../../../../types/Dice";
+import { IMapPlus, ISetPlus, MapPlus, SetPlus } from "@carljmcgee/set-map-plus";
+import { User } from "@prisma/client";
+import { useChannel } from "../../../../utils/pusher-store";
 
 const RoomSession: NextPage = () => {
   // router
@@ -20,24 +23,59 @@ const RoomSession: NextPage = () => {
 
   // state
   const [diceSet, setDiceSet] = useState<DiceType>("standard");
+  const [activePlayers, setActivePLayers] = useState<IMapPlus<string, User>>(
+    MapPlus()
+  );
 
   // trpc calls
   const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery({
     roomId: roomId ?? "",
   });
-  const { data: user, isLoading: userLoading } = trpc.user.getOne.useQuery({
-    userId: userId ?? "",
-  });
+  const { data: player, isLoading: userLoading } = trpc.user.getOne.useQuery(
+    {
+      userId: userId ?? "",
+    },
+    {
+      onSuccess(user) {
+        setUserOnline({ userId: user.id });
+      },
+    }
+  );
+  trpc.user.inRoom.useQuery(
+    { roomId: roomId ?? "" },
+    {
+      onSuccess(data) {
+        data.forEach((player) => {
+          activePlayers.set(player.charName, player);
+        });
+      },
+    }
+  );
+  const { mutate: setUserOnline } = trpc.user.login.useMutation();
+  const { mutate: setUserOffline } = trpc.user.logout.useMutation();
 
   // go dice
   const [dice, requestDie, removeDie] = useDiceSet();
   const genesys = useGenesysResult();
+
+  // pusher
+  const { BindEvent } = useChannel(roomId ?? "");
+  BindEvent<User>("player-joined", (player) => {
+    activePlayers.set(player.charName, player);
+  });
+  BindEvent<User>("player-left", (player) => {
+    activePlayers.delete(player.charName);
+  });
 
   useEffect(() => {
     return () => {
       dice.forEach((die) => {
         die.disconnect();
       });
+
+      if (userId && player) {
+        setUserOffline({ userId: userId });
+      }
     };
   }, []);
 
@@ -56,18 +94,18 @@ const RoomSession: NextPage = () => {
         <div className="flex flex-col justify-center">
           <Head>
             <title>
-              {room?.name}: {user?.charName}
+              {room?.name}: {player?.charName}
             </title>
           </Head>
           <h1 className="text-center text-4xl">{room?.name}</h1>
           <h2 className="text-center text-2xl">
-            Character Name: {user?.charName}
+            Character Name: {player?.charName}
           </h2>
           <h2 className="text-center text-2xl">
-            Player Name: {user?.playerName}
+            Player Name: {player?.playerName}
           </h2>
           <ol className="flex flex-col justify-center">
-            {user?.dieRolls.map((roll) => (
+            {player?.dieRolls.map((roll) => (
               <li>{roll.outcome}</li>
             ))}
           </ol>
@@ -91,10 +129,8 @@ const RoomSession: NextPage = () => {
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
           <ol>
-            {room?.players.map((player) => (
-              <li key={player.id} className="list-inside list-disc">
-                {player.charName}
-              </li>
+            {activePlayers.toArr().map(([charName]) => (
+              <li>{charName}</li>
             ))}
           </ol>
         </div>
