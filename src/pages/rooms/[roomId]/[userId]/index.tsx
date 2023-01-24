@@ -1,14 +1,15 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 import { useGenesysDie } from "../../../../utils/go-dice-genesys-hooks";
 import DieDisplay from "../../../../components/DieDisplay";
-import tableTex from "./realistic-wood-texture-background_87521-3153.webp";
+import type { DiceType } from "../../../../types/Dice";
+import { useElementSize } from "@mantine/hooks";
 
 const RoomSession: NextPage = () => {
   // router
@@ -19,6 +20,9 @@ const RoomSession: NextPage = () => {
   }
   const { roomId, userId }: RoomSessParams = router.query;
 
+  // state
+  const [diceType, setDiceType] = useState<DiceType>("standard");
+
   // trpc calls
   const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery({
     roomId: roomId ?? "",
@@ -28,8 +32,16 @@ const RoomSession: NextPage = () => {
   });
 
   // go dice
-  const [dice, requestDie] = useDiceSet();
+  const [dice, requestDie, removeDie] = useDiceSet();
   const genesys = useGenesysResult();
+
+  useEffect(() => {
+    return () => {
+      dice.forEach((die) => {
+        die.disconnect();
+      });
+    };
+  }, []);
 
   if (roomLoading || userLoading) {
     return (
@@ -68,6 +80,14 @@ const RoomSession: NextPage = () => {
             >
               Add Die
             </button>
+            <select
+              name="dice-type"
+              id="dice-type"
+              onChange={(e) => setDiceType(e.target.value as DiceType)}
+            >
+              <option value="standard">Standard</option>
+              <option value="genesys">Genesys</option>
+            </select>
           </div>
         </div>
         <div className="text-center">
@@ -81,15 +101,16 @@ const RoomSession: NextPage = () => {
           </ol>
         </div>
       </div>
-      <div className="tableTex mx-auto flex h-96 w-4/5 flex-col items-center rounded-md"></div>
-      <div className="grid grid-cols-3">
+      <div className="tableTex mx-auto grid min-h-screen w-4/5 grid-cols-1 items-start rounded-md md:grid-cols-3">
         {dice.map((die, i) => (
           <DieDisplay
             key={die.id}
+            diceType={diceType}
             die={die}
             index={i}
             inputResult={genesys.inputResult}
             setRolled={genesys.setRolled}
+            removeDie={removeDie}
           />
         ))}
       </div>

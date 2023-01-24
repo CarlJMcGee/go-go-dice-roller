@@ -1,4 +1,4 @@
-import { DiceSet, Die } from "go-dice-api";
+import { DiceSet, Die } from "../go-dice-api";
 
 export function useDiceSet(): [
   dice: Die[],

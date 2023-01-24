@@ -4,29 +4,36 @@ import { useEffect, useState } from "react";
 import { genDieFaces, genDieTypes } from "../../types/genesysDice";
 import {
   useBatteryLevel,
+  useConnectionStatus,
   useDieColor,
   useRolling,
 } from "../../utils/go-dice-react";
 import { DieTypes } from "../../utils/go-dice-api/src/die";
 import { useGenesysDie } from "../../utils/go-dice-genesys-hooks";
+import { DiceType } from "../../types/Dice";
 
 export interface IDieDisplayProps {
+  diceType: DiceType;
   die: Die;
   index: number;
   inputResult: (values: genDieFaces[]) => void;
   setRolled: React.Dispatch<React.SetStateAction<boolean>>;
+  removeDie: (dieId: string) => void;
 }
 
 export default function DieDisplay({
+  diceType,
   die,
   index: i,
   inputResult,
   setRolled,
+  removeDie,
 }: IDieDisplayProps) {
   const [label, setLabel] = useState(`Die #${i + 1}`);
   const [editing, setEditing] = useState(false);
   const [dieType, setDieType] = useState<genDieTypes>("boost");
 
+  const connected = useConnectionStatus(die);
   const dieColor = useDieColor(die);
   const batteryLvl = useBatteryLevel(die);
   const rolling = useRolling(die);
@@ -53,6 +60,12 @@ export default function DieDisplay({
     inputResult(value);
   }, [value]);
 
+  useEffect(() => {
+    if (!connected) {
+      removeDie(die.id);
+    }
+  }, [connected]);
+
   const borderColorMap = MapPlus<string, string>([
     ["boost", "border-sky-600"],
     ["ability", "border-green-600"],
@@ -72,9 +85,10 @@ export default function DieDisplay({
 
   return (
     <div
-      className={`m-3 flex h-52 w-52 flex-col justify-center justify-self-center border-4 p-3 ${
-        dieColor ? borderColorMap.get(dieType) : "border-white"
-      } ${dieColor ? bgColorMap.get(dieType) : "bg-gray-200"}`}
+      className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${borderColorMap.get(
+        dieType
+      )} 
+        ${bgColorMap.get(dieType)}`}
     >
       <div className="text-center">
         {editing ? (
