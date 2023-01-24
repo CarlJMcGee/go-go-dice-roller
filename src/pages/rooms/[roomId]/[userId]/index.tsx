@@ -6,10 +6,8 @@ import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
-import { useGenesysDie } from "../../../../utils/go-dice-genesys-hooks";
 import DieDisplay from "../../../../components/DieDisplay";
 import type { DiceType } from "../../../../types/Dice";
-import { useElementSize } from "@mantine/hooks";
 
 const RoomSession: NextPage = () => {
   // router
@@ -21,7 +19,7 @@ const RoomSession: NextPage = () => {
   const { roomId, userId }: RoomSessParams = router.query;
 
   // state
-  const [diceType, setDiceType] = useState<DiceType>("standard");
+  const [diceSet, setDiceSet] = useState<DiceType>("standard");
 
   // trpc calls
   const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery({
@@ -83,7 +81,7 @@ const RoomSession: NextPage = () => {
             <select
               name="dice-type"
               id="dice-type"
-              onChange={(e) => setDiceType(e.target.value as DiceType)}
+              onChange={(e) => setDiceSet(e.target.value as DiceType)}
             >
               <option value="standard">Standard</option>
               <option value="genesys">Genesys</option>
@@ -101,18 +99,35 @@ const RoomSession: NextPage = () => {
           </ol>
         </div>
       </div>
-      <div className="tableTex mx-auto grid min-h-screen w-4/5 grid-cols-1 items-start rounded-md md:grid-cols-3">
-        {dice.map((die, i) => (
-          <DieDisplay
-            key={die.id}
-            diceType={diceType}
-            die={die}
-            index={i}
-            inputResult={genesys.inputResult}
-            setRolled={genesys.setRolled}
-            removeDie={removeDie}
-          />
-        ))}
+      <div className="tableTex mx-auto mb-10 min-h-screen w-4/5 rounded-md">
+        <div className="flex justify-center text-center text-4xl text-white">
+          {genesys.rolled && (
+            <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${
+              genesys.sideEffects && `with ${genesys.sideEffects}`
+            }`}</h3>
+          )}
+          {genesys.rolled && (
+            <button
+              className="rounded-md bg-gray-400 px-2 py-1 hover:bg-gray-600"
+              onClick={() => genesys.resetResults()}
+            >
+              Reset
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 items-start md:grid-cols-3">
+          {dice.map((die, i) => (
+            <DieDisplay
+              key={die.id}
+              diceSet={diceSet}
+              die={die}
+              index={i}
+              inputResult={genesys.inputResult}
+              setRolled={genesys.setRolled}
+              removeDie={removeDie}
+            />
+          ))}
+        </div>
       </div>
     </>
   );

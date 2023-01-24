@@ -13,7 +13,7 @@ import { useGenesysDie } from "../../utils/go-dice-genesys-hooks";
 import { DiceType } from "../../types/Dice";
 
 export interface IDieDisplayProps {
-  diceType: DiceType;
+  diceSet: DiceType;
   die: Die;
   index: number;
   inputResult: (values: genDieFaces[]) => void;
@@ -22,7 +22,7 @@ export interface IDieDisplayProps {
 }
 
 export default function DieDisplay({
-  diceType,
+  diceSet,
   die,
   index: i,
   inputResult,
@@ -53,7 +53,7 @@ export default function DieDisplay({
   }, [dieType]);
 
   useEffect(() => {
-    if (!value) {
+    if (!value || value[0] === "blank") {
       return;
     }
     setRolled(true);
@@ -90,6 +90,15 @@ export default function DieDisplay({
       )} 
         ${bgColorMap.get(dieType)}`}
     >
+      <h3
+        className="relative left-40 -top-2 text-xl text-red-500 hover:cursor-pointer"
+        onClick={() => {
+          removeDie(die.id);
+          die.disconnect();
+        }}
+      >
+        X
+      </h3>
       <div className="text-center">
         {editing ? (
           <input
@@ -139,7 +148,7 @@ export default function DieDisplay({
       </div>
       <div className="flex h-full items-center justify-center text-center">
         {rolling ? <h3 className="text-4xl">Rolling...</h3> : null}
-        {!rolling && value ? (
+        {!rolling && value && value[0] !== "blank" ? (
           <h3 className="text-2xl text-white">{value.join(" + ")}</h3>
         ) : null}
       </div>
