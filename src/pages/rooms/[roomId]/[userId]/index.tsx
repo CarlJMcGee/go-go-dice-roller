@@ -23,11 +23,9 @@ const RoomSession: NextPage = () => {
 
   // state
   const [diceSet, setDiceSet] = useState<DiceType>("standard");
-  const [activePlayers, setActivePLayers] = useState<IMapPlus<string, User>>(
-    MapPlus()
-  );
 
   // trpc calls
+  const utils = trpc.useContext();
   const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery({
     roomId: roomId ?? "",
   });
@@ -41,16 +39,13 @@ const RoomSession: NextPage = () => {
       },
     }
   );
-  trpc.user.inRoom.useQuery(
-    { roomId: roomId ?? "" },
-    {
-      onSuccess(data) {
-        data.forEach((player) => {
-          activePlayers.set(player.charName, player);
-        });
-      },
-    }
-  );
+  const { data: activePlayers, refetch: getPlayers } =
+    trpc.user.inRoom.useQuery(
+      { roomId: roomId ?? "" },
+      {
+        refetchInterval: 3000,
+      }
+    );
   const { mutate: setUserOnline } = trpc.user.login.useMutation();
   const { mutate: setUserOffline } = trpc.user.logout.useMutation();
 
@@ -61,21 +56,32 @@ const RoomSession: NextPage = () => {
   // pusher
   const { BindEvent } = useChannel(roomId ?? "");
   BindEvent<User>("player-joined", (player) => {
-    activePlayers.set(player.charName, player);
+    // activePlayers.set(player.charName, player);
+    utils.user.inRoom.invalidate();
   });
   BindEvent<User>("player-left", (player) => {
-    activePlayers.delete(player.charName);
+    // activePlayers.delete(player.charName);
+    utils.user.inRoom.invalidate();
   });
 
   useEffect(() => {
+    function handleWindowClose(e: Event) {
+      if (document.visibilityState === "hidden") {
+        navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleWindowClose);
+    window.addEventListener("pagehide", handleWindowClose);
+
     return () => {
+      document.removeEventListener("visibilitychange", handleWindowClose);
+      window.removeEventListener("pagehide", handleWindowClose);
+
       dice.forEach((die) => {
+        removeDie(die.id);
         die.disconnect();
       });
-
-      if (userId && player) {
-        setUserOffline({ userId: userId });
-      }
     };
   }, []);
 
@@ -89,8 +95,7 @@ const RoomSession: NextPage = () => {
 
   return (
     <>
-      <div className="grid grid-cols-3">
-        <div></div>
+      <div className="flex justify-between">
         <div className="flex flex-col justify-center">
           <Head>
             <title>
@@ -128,14 +133,16 @@ const RoomSession: NextPage = () => {
         </div>
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
-          <ol>
-            {activePlayers.toArr().map(([charName]) => (
-              <li>{charName}</li>
-            ))}
-          </ol>
+          {activePlayers && activePlayers?.length > 0 && (
+            <ol>
+              {activePlayers.map(({ charName }) => (
+                <li key={charName}>{charName}</li>
+              ))}
+            </ol>
+          )}
         </div>
       </div>
-      <div className="tableTex mx-auto mb-10 min-h-screen w-4/5 rounded-md">
+      <div className="tableTex mb-10 min-h-screen rounded-md md:mx-auto md:w-4/5">
         <div className="flex justify-center text-center text-4xl text-white">
           {genesys.rolled && (
             <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${
