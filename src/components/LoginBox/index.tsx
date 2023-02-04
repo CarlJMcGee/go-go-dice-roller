@@ -26,13 +26,14 @@ export default function LoginBox() {
   const {
     data: searchRes,
     isLoading: searchResLoading,
-    refetch,
+    refetch: search,
   } = trpc.room.findRoom.useQuery({ search: roomName });
   const { mutate: addCharacter } = trpc.user.add.useMutation({
     onSuccess(data) {
       setChar(data);
     },
   });
+  const { mutate: login } = trpc.user.login.useMutation();
 
   // handlers
   const addRoomHandler = (e: React.FormEvent) => {
@@ -80,9 +81,9 @@ export default function LoginBox() {
   }, [playerForm.values.charName]);
 
   return (
-    <div className="h-1/2 w-2/6 bg-slate-400">
-      <h3 className="my-3 text-center text-3xl text-white underline">
-        Login to Session
+    <div className="rounded-md bg-slate-400 md:h-1/2 md:w-2/6">
+      <h3 className="my-3 mx-3 text-center text-3xl text-white underline">
+        Login to Game Session
       </h3>
       <div className="flex flex-col items-center">
         <form
@@ -97,7 +98,7 @@ export default function LoginBox() {
             placeholder="Room Name"
             onChange={(e) => {
               setRoomName(e);
-              refetch();
+              search();
             }}
           />
           <button
@@ -154,8 +155,9 @@ export default function LoginBox() {
         </form>
         {room && character ? (
           <Link
-            href={`/rooms/${room?.id}/${character?.id}`}
-            className="mt-2 w-1/2 self-center rounded-md bg-teal-500 p-1 text-center hover:bg-teal-300"
+            href={`/rooms/${room.id}/${character.id}`}
+            className="m-3 w-1/2 self-center rounded-md bg-teal-500 p-1 text-center hover:bg-teal-300"
+            onClick={() => login({ userId: character.id })}
           >
             <button type="button">Enter Room</button>
           </Link>
