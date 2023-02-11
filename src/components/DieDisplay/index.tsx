@@ -91,7 +91,7 @@ export default function DieDisplay({
         ${bgColorMap.get(dieType)}`}
     >
       <h3
-        className="relative left-40 -top-2 text-xl text-red-500 hover:cursor-pointer"
+        className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
         onClick={() => {
           removeDie(die.id);
           die.disconnect();

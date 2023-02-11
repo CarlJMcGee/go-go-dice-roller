@@ -94,8 +94,9 @@ const RoomSession: NextPage = () => {
   }
 
   return (
-    <>
+    <div className="w-full">
       <div className="flex justify-between">
+        {/* header container */}
         <div className="flex flex-col justify-center">
           <Head>
             <title>
@@ -114,6 +115,7 @@ const RoomSession: NextPage = () => {
               <li>{roll.outcome}</li>
             ))}
           </ol>
+          {/* die selector */}
           <div>
             <button
               className="m-4 h-12 w-12 self-center rounded-md border-4 border-double border-gray-700 bg-gray-400 text-sm text-white"
@@ -131,6 +133,7 @@ const RoomSession: NextPage = () => {
             </select>
           </div>
         </div>
+        {/* player list */}
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
           {activePlayers && activePlayers?.length > 0 && (
@@ -142,7 +145,9 @@ const RoomSession: NextPage = () => {
           )}
         </div>
       </div>
-      <div className="tableTex mb-10 min-h-screen rounded-md md:mx-auto md:w-4/5">
+      {/* table container */}
+      <div className="tableTex mx-auto mb-10  min-h-screen  w-11/12 rounded-md md:w-4/5">
+        {/* die outcome display */}
         <div className="flex justify-center text-center text-4xl text-white">
           {genesys.rolled && (
             <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${
@@ -158,6 +163,7 @@ const RoomSession: NextPage = () => {
             </button>
           )}
         </div>
+        {/* dice */}
         <div className="grid grid-cols-1 items-start md:grid-cols-3">
           {dice.map((die, i) => (
             <DieDisplay
@@ -172,7 +178,7 @@ const RoomSession: NextPage = () => {
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
