@@ -10,7 +10,7 @@ import DieDisplay from "../../../../components/DieDisplay";
 import type { DiceType } from "../../../../types/Dice";
 import { IMapPlus, ISetPlus, MapPlus, SetPlus } from "@carljmcgee/set-map-plus";
 import { User } from "@prisma/client";
-import { useChannel } from "../../../../utils/pusher-store";
+import { pusherClient, useChannel } from "../../../../utils/pusher-store";
 
 const RoomSession: NextPage = () => {
   // router
@@ -34,18 +34,18 @@ const RoomSession: NextPage = () => {
       userId: userId ?? "",
     },
     {
-      onSuccess(user) {
-        setUserOnline({ userId: user.id });
-      },
+      // onSuccess(user) {
+      //   setUserOnline({ userId: user.id });
+      // },
     }
   );
-  const { data: activePlayers, refetch: getPlayers } =
-    trpc.user.inRoom.useQuery(
-      { roomId: roomId ?? "" },
-      {
-        refetchInterval: 3000,
-      }
-    );
+  // const { data: activePlayers, refetch: getPlayers } =
+  //   trpc.user.inRoom.useQuery(
+  //     { roomId: roomId ?? "" },
+  //     {
+  //       refetchInterval: 3000,
+  //     }
+  //   );
   const { mutate: setUserOnline } = trpc.user.login.useMutation();
   const { mutate: setUserOffline } = trpc.user.logout.useMutation();
 
@@ -65,18 +65,19 @@ const RoomSession: NextPage = () => {
   });
 
   useEffect(() => {
-    function handleWindowClose(e: Event) {
-      if (document.visibilityState === "hidden") {
-        navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
-      }
-    }
+    pusherClient.signin();
+    // function handleWindowClose(e: Event) {
+    //   if (document.visibilityState === "hidden") {
+    //     navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
+    //   }
+    // }
 
-    document.addEventListener("visibilitychange", handleWindowClose);
-    window.addEventListener("pagehide", handleWindowClose);
+    // document.addEventListener("visibilitychange", handleWindowClose);
+    // window.addEventListener("pagehide", handleWindowClose);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleWindowClose);
-      window.removeEventListener("pagehide", handleWindowClose);
+      // document.removeEventListener("visibilitychange", handleWindowClose);
+      // window.removeEventListener("pagehide", handleWindowClose);
 
       dice.forEach((die) => {
         removeDie(die.id);
