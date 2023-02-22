@@ -10,7 +10,12 @@ import DieDisplay from "../../../../components/DieDisplay";
 import type { DiceType } from "../../../../types/Dice";
 import { IMapPlus, ISetPlus, MapPlus, SetPlus } from "@carljmcgee/set-map-plus";
 import { User } from "@prisma/client";
-import { pusherClient, useChannel } from "../../../../utils/pusher-store";
+import {
+  pusherClient,
+  useChannel,
+  usePresenceChannel,
+} from "../../../../utils/pusher-store";
+import { Members } from "pusher-js";
 
 const RoomSession: NextPage = () => {
   // router
@@ -23,6 +28,7 @@ const RoomSession: NextPage = () => {
 
   // state
   const [diceSet, setDiceSet] = useState<DiceType>("standard");
+  const [members, updateMembers] = useState<string[] | undefined>();
 
   // trpc calls
   const utils = trpc.useContext();
@@ -34,9 +40,10 @@ const RoomSession: NextPage = () => {
       userId: userId ?? "",
     },
     {
-      // onSuccess(user) {
-      //   setUserOnline({ userId: user.id });
-      // },
+      onSuccess(user) {
+        // setUserOnline({ userId: user.id });
+        pusherClient.signin();
+      },
     }
   );
   // const { data: activePlayers, refetch: getPlayers } =
@@ -54,18 +61,20 @@ const RoomSession: NextPage = () => {
   const genesys = useGenesysResult();
 
   // pusher
-  const { BindEvent } = useChannel(roomId ?? "");
-  BindEvent<User>("player-joined", (player) => {
+  const { bindEvt, Members } = usePresenceChannel(`presence-${roomId}` ?? "");
+  bindEvt<Members>("pusher:subscription_succeeded", (members) => {
+    console.log(members);
+  });
+  bindEvt<User>("player-joined", (player) => {
     // activePlayers.set(player.charName, player);
     utils.user.inRoom.invalidate();
   });
-  BindEvent<User>("player-left", (player) => {
+  bindEvt<User>("player-left", (player) => {
     // activePlayers.delete(player.charName);
     utils.user.inRoom.invalidate();
   });
 
   useEffect(() => {
-    pusherClient.signin();
     // function handleWindowClose(e: Event) {
     //   if (document.visibilityState === "hidden") {
     //     navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
@@ -137,10 +146,10 @@ const RoomSession: NextPage = () => {
         {/* player list */}
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
-          {activePlayers && activePlayers?.length > 0 && (
+          {members && members?.length > 0 && (
             <ol>
-              {activePlayers.map(({ charName }) => (
-                <li key={charName}>{charName}</li>
+              {members.map((member) => (
+                <li key={member}>{member}</li>
               ))}
             </ol>
           )}

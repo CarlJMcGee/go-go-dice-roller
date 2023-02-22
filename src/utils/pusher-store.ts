@@ -1,11 +1,17 @@
 import { User } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import PusherServer from "pusher";
-import PusherClient, { Channel } from "pusher-js";
+import PusherClient, { Channel, PresenceChannel } from "pusher-js";
 import { string } from "zod";
 import { UserFull } from "../types/user";
 
-type channelEvt = "player-joined" | "player-left" | "rolled";
+type channelEvt =
+  | "player-joined"
+  | "player-left"
+  | "rolled"
+  | "pusher:subscription_succeeded"
+  | "pusher:member_added"
+  | "pusher:member_removed";
 
 type roomID = string;
 
@@ -20,7 +26,15 @@ export const pusherServer = new PusherServer({
 export const pusherClient = new PusherClient("91fcd24238f218b740dc", {
   cluster: "us2",
   forceTLS: true,
-  channelAuthorization: { endpoint: "/api/pusher/auth", transport: "ajax" },
+  channelAuthorization: {
+    endpoint: "/api/pusher/channel-auth",
+    transport: "ajax",
+  },
+  userAuthentication: {
+    endpoint: "/api/pusher/user-auth",
+    transport: "ajax",
+    headers: { userid: "clczo18nj0000xw3cfdlwvib0", username: "edyh" },
+  },
 });
 
 export const useChannel = (
@@ -53,6 +67,18 @@ export const useChannel = (
   }
 
   return { Subscription, BindEvent, BindNRefetch };
+};
+
+export const usePresenceChannel = (channel: string) => {
+  const Subscription = pusherClient.subscribe(channel) as PresenceChannel;
+
+  function bindEvt<T = void>(event: channelEvt, callback: (data: T) => any) {
+    return Subscription.bind(event, callback);
+  }
+
+  const disconnect = Subscription.disconnect;
+  const Members = Subscription.members;
+  return { Subscription, bindEvt, disconnect, Members };
 };
 
 export async function triggerEvent<D = void>(

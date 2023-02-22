@@ -20,6 +20,7 @@ function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
 
   try {
     const auth = pusherServer.authorizeChannel(socket_id, channel_name);
+    res.status(200).send(auth);
   } catch (err) {
     if (err) console.error(err);
   }
