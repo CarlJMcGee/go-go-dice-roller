@@ -29,7 +29,7 @@ export const pusherClient = new PusherClient("91fcd24238f218b740dc", {
   forceTLS: true,
 });
 
-export function usePrivatePusherClient(userId: string, username: string) {
+export function usePrivatePusherClient(userId: string) {
   // const [pusher, setPusher] = useState<PusherClient>()
 
   return new PusherClient("91fcd24238f218b740dc", {
@@ -42,7 +42,7 @@ export function usePrivatePusherClient(userId: string, username: string) {
     userAuthentication: {
       endpoint: "/api/pusher/user-auth",
       transport: "ajax",
-      headers: { userid: userId, username: username },
+      headers: { userid: userId },
     },
   });
 }

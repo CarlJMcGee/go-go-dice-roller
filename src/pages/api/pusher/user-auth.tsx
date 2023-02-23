@@ -1,10 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { trpc } from "../../../utils/api";
 import { pusherServer } from "../../../utils/pusher-store";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   switch (req.method) {
     case "POST":
-      pusherAuth(req, res);
+      await pusherAuth(req, res);
       break;
 
     default:
@@ -12,18 +16,21 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
+async function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
   const { socket_id } = req.body;
-  const { userid, username } = req.headers as {
+  const { userid } = req.headers as {
     userid: string;
-    username: string;
   };
+
+  const user = await prisma?.user.findUnique({
+    where: {
+      id: userid,
+    },
+  });
 
   const userData = {
     id: userid,
-    user_info: {
-      username: username,
-    },
+    user_info: user,
   };
 
   const auth = pusherServer.authenticateUser(socket_id, userData);

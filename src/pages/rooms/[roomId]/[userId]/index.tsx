@@ -17,21 +17,20 @@ import {
 } from "../../../../utils/pusher-store";
 import { Members } from "pusher-js";
 import { Member } from "../../../../types/pusher";
+import { listenerCount } from "events";
 
-const RoomSession: NextPage = () => {
+const RoomSession = () => {
   // router
   const router = useRouter();
-  interface RoomSessParams extends ParsedUrlQuery {
-    roomId?: string;
-    userId?: string;
-  }
-  const { roomId, userId }: RoomSessParams = router.query;
+  type RoomSessParams = ParsedUrlQuery & {
+    roomId: string;
+    userId: string;
+  };
+  const { roomId, userId } = router.query as RoomSessParams;
 
   // state
   const [diceSet, setDiceSet] = useState<DiceType>("standard");
-  const [membersList, updateMembers] = useState<
-    { id: string; info: { username: string } }[]
-  >([]);
+  const [membersList, updateMembers] = useState<User[]>([]);
 
   // trpc calls
   const utils = trpc.useContext();
@@ -43,38 +42,38 @@ const RoomSession: NextPage = () => {
       userId: userId ?? "",
     },
     {
-      onSuccess(user) {
-        // setUserOnline({ userId: user.id });
+      onSuccess: () => {
+        pusher.signin();
       },
+      retry: 3,
+      retryDelay: 500,
     }
   );
-  // const { data: activePlayers, refetch: getPlayers } =
-  //   trpc.user.inRoom.useQuery(
-  //     { roomId: roomId ?? "" },
-  //     {
-  //       refetchInterval: 3000,
-  //     }
-  //   );
-  const { mutate: setUserOnline } = trpc.user.login.useMutation();
-  const { mutate: setUserOffline } = trpc.user.logout.useMutation();
+  const pusher = usePrivatePusherClient(userId);
 
   // go dice
   const [dice, requestDie, removeDie] = useDiceSet();
   const genesys = useGenesysResult();
 
   // pusher
-  const pusher = usePrivatePusherClient("clehck0ol0003uz1vwwqiposa", "Bilbo");
-  const { bindEvt, Members } = usePresenceChannel(
+  const { bindEvt, Members, Subscription } = usePresenceChannel(
     pusher,
-    `presence-clehcjrae0000uz1vmdxyl708` ?? ""
+    `presence-${roomId}` ?? ""
   );
   bindEvt<Members>("pusher:subscription_succeeded", (members) => {
-    members.each((member: { id: string; info: { username: string } }) => {
-      updateMembers([...membersList, member]);
-    });
+    console.log(members);
+    console.log(Object.values(members.members));
+
+    updateMembers([...(Object.values(members.members) as User[])]);
   });
-  bindEvt<Member>("pusher:member_added", (member) => {
-    console.log(member);
+  bindEvt<Member>("pusher:member_added", (joined) => {
+    updateMembers([...membersList, joined.info]);
+    console.log(membersList);
+  });
+  bindEvt<{ user_id: string }>("pusher:member_removed", (departed) => {
+    updateMembers([
+      ...membersList.filter((member) => member.id !== departed.user_id),
+    ]);
   });
   bindEvt<User>("player-joined", (player) => {
     // activePlayers.set(player.charName, player);
@@ -86,8 +85,6 @@ const RoomSession: NextPage = () => {
   });
 
   useEffect(() => {
-    pusher.signin();
-
     // function handleWindowClose(e: Event) {
     //   if (document.visibilityState === "hidden") {
     //     navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
@@ -101,18 +98,14 @@ const RoomSession: NextPage = () => {
       // document.removeEventListener("visibilitychange", handleWindowClose);
       // window.removeEventListener("pagehide", handleWindowClose);
 
+      Subscription.unsubscribe();
+
       dice.forEach((die) => {
         removeDie(die.id);
         die.disconnect();
       });
     };
   }, []);
-
-  useEffect(() => {
-    membersList.forEach((member) => {
-      console.log(member);
-    });
-  }, [membersList]);
 
   if (roomLoading || userLoading) {
     return (
@@ -165,13 +158,16 @@ const RoomSession: NextPage = () => {
         {/* player list */}
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
-          {membersList && membersList?.length > 0 && (
-            <ol>
-              {membersList.map((member) => (
-                <li>{member.info.username}</li>
+          {/* {memberSet.size > 0 && ( */}
+          <ol>
+            {membersList.length > 0 &&
+              membersList.map((member) => (
+                <li key={member.id}>
+                  <h3>{member.charName}</h3>
+                </li>
               ))}
-            </ol>
-          )}
+          </ol>
+          {/* )} */}
         </div>
       </div>
       {/* table container */}

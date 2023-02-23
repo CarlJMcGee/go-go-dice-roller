@@ -1,6 +1,6 @@
+import { User } from "@prisma/client";
+
 export type Member = {
   id: string;
-  info: {
-    username: string;
-  };
+  info: User;
 };
