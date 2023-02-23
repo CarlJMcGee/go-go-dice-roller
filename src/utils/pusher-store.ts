@@ -2,6 +2,7 @@ import { User } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import PusherServer from "pusher";
 import PusherClient, { Channel, Members, PresenceChannel } from "pusher-js";
+import { useState } from "react";
 import { string } from "zod";
 import { UserFull } from "../types/user";
 
@@ -28,7 +29,9 @@ export const pusherClient = new PusherClient("91fcd24238f218b740dc", {
   forceTLS: true,
 });
 
-export function privatePusherClient(userId: string, username: string) {
+export function usePrivatePusherClient(userId: string, username: string) {
+  // const [pusher, setPusher] = useState<PusherClient>()
+
   return new PusherClient("91fcd24238f218b740dc", {
     cluster: "us2",
     forceTLS: true,

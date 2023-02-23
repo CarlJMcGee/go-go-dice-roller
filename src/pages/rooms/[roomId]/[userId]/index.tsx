@@ -11,12 +11,12 @@ import type { DiceType } from "../../../../types/Dice";
 import { IMapPlus, ISetPlus, MapPlus, SetPlus } from "@carljmcgee/set-map-plus";
 import { User } from "@prisma/client";
 import {
-  privatePusherClient,
   pusherClient,
-  useChannel,
   usePresenceChannel,
+  usePrivatePusherClient,
 } from "../../../../utils/pusher-store";
 import { Members } from "pusher-js";
+import { Member } from "../../../../types/pusher";
 
 const RoomSession: NextPage = () => {
   // router
@@ -29,7 +29,9 @@ const RoomSession: NextPage = () => {
 
   // state
   const [diceSet, setDiceSet] = useState<DiceType>("standard");
-  const [membersList, updateMembers] = useState<{ username: string }[]>([]);
+  const [membersList, updateMembers] = useState<
+    { id: string; info: { username: string } }[]
+  >([]);
 
   // trpc calls
   const utils = trpc.useContext();
@@ -43,7 +45,6 @@ const RoomSession: NextPage = () => {
     {
       onSuccess(user) {
         // setUserOnline({ userId: user.id });
-        pusherClient.signin();
       },
     }
   );
@@ -62,16 +63,18 @@ const RoomSession: NextPage = () => {
   const genesys = useGenesysResult();
 
   // pusher
-  const pusher = privatePusherClient(player?.id!, player?.charName!);
+  const pusher = usePrivatePusherClient("clehck0ol0003uz1vwwqiposa", "Bilbo");
   const { bindEvt, Members } = usePresenceChannel(
     pusher,
-    `presence-${roomId}` ?? ""
+    `presence-clehcjrae0000uz1vmdxyl708` ?? ""
   );
   bindEvt<Members>("pusher:subscription_succeeded", (members) => {
-    console.log(members);
-    members.each((member: { username: string }) => {
+    members.each((member: { id: string; info: { username: string } }) => {
       updateMembers([...membersList, member]);
     });
+  });
+  bindEvt<Member>("pusher:member_added", (member) => {
+    console.log(member);
   });
   bindEvt<User>("player-joined", (player) => {
     // activePlayers.set(player.charName, player);
@@ -83,6 +86,8 @@ const RoomSession: NextPage = () => {
   });
 
   useEffect(() => {
+    pusher.signin();
+
     // function handleWindowClose(e: Event) {
     //   if (document.visibilityState === "hidden") {
     //     navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
@@ -104,7 +109,9 @@ const RoomSession: NextPage = () => {
   }, []);
 
   useEffect(() => {
-    console.log(membersList);
+    membersList.forEach((member) => {
+      console.log(member);
+    });
   }, [membersList]);
 
   if (roomLoading || userLoading) {
@@ -158,14 +165,13 @@ const RoomSession: NextPage = () => {
         {/* player list */}
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
-          {/* {Members && Members?.count > 0 && (
-            // !
+          {membersList && membersList?.length > 0 && (
             <ol>
-              {Members.members((member) => (
-                <li key={member}>{member}</li>
+              {membersList.map((member) => (
+                <li>{member.info.username}</li>
               ))}
             </ol>
-          )} */}
+          )}
         </div>
       </div>
       {/* table container */}
