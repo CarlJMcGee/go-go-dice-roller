@@ -28,7 +28,7 @@ const RoomSession: NextPage = () => {
 
   // state
   const [diceSet, setDiceSet] = useState<DiceType>("standard");
-  const [members, updateMembers] = useState<string[] | undefined>();
+  const [membersList, updateMembers] = useState<{ username: string }[]>([]);
 
   // trpc calls
   const utils = trpc.useContext();
@@ -64,6 +64,9 @@ const RoomSession: NextPage = () => {
   const { bindEvt, Members } = usePresenceChannel(`presence-${roomId}` ?? "");
   bindEvt<Members>("pusher:subscription_succeeded", (members) => {
     console.log(members);
+    members.each((member: { username: string }) => {
+      updateMembers([...membersList, member]);
+    });
   });
   bindEvt<User>("player-joined", (player) => {
     // activePlayers.set(player.charName, player);
@@ -94,6 +97,10 @@ const RoomSession: NextPage = () => {
       });
     };
   }, []);
+
+  useEffect(() => {
+    console.log(membersList);
+  }, [membersList]);
 
   if (roomLoading || userLoading) {
     return (
@@ -146,13 +153,14 @@ const RoomSession: NextPage = () => {
         {/* player list */}
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
-          {members && members?.length > 0 && (
+          {/* {Members && Members?.count > 0 && (
+            // !
             <ol>
-              {members.map((member) => (
+              {Members.members((member) => (
                 <li key={member}>{member}</li>
               ))}
             </ol>
-          )}
+          )} */}
         </div>
       </div>
       {/* table container */}

@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import PusherServer from "pusher";
-import PusherClient, { Channel, PresenceChannel } from "pusher-js";
+import PusherClient, { Channel, Members, PresenceChannel } from "pusher-js";
 import { string } from "zod";
 import { UserFull } from "../types/user";
 

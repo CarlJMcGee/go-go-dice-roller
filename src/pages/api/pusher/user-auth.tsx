@@ -19,9 +19,6 @@ function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
     username: string;
   };
 
-  console.log(req.body);
-  console.log(req.headers);
-
   const userData = {
     id: userid,
     user_info: {
