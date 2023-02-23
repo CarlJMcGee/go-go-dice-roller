@@ -26,16 +26,23 @@ export const pusherServer = new PusherServer({
 export const pusherClient = new PusherClient("91fcd24238f218b740dc", {
   cluster: "us2",
   forceTLS: true,
-  channelAuthorization: {
-    endpoint: "/api/pusher/channel-auth",
-    transport: "ajax",
-  },
-  userAuthentication: {
-    endpoint: "/api/pusher/user-auth",
-    transport: "ajax",
-    headers: { userid: "clczo18nj0000xw3cfdlwvib0", username: "edyh" },
-  },
 });
+
+export function privatePusherClient(userId: string, username: string) {
+  return new PusherClient("91fcd24238f218b740dc", {
+    cluster: "us2",
+    forceTLS: true,
+    channelAuthorization: {
+      endpoint: "/api/pusher/channel-auth",
+      transport: "ajax",
+    },
+    userAuthentication: {
+      endpoint: "/api/pusher/user-auth",
+      transport: "ajax",
+      headers: { userid: userId, username: username },
+    },
+  });
+}
 
 export const useChannel = (
   channel: roomID
@@ -69,8 +76,13 @@ export const useChannel = (
   return { Subscription, BindEvent, BindNRefetch };
 };
 
-export const usePresenceChannel = (channel: string) => {
-  const Subscription = pusherClient.subscribe(channel) as PresenceChannel;
+export const usePresenceChannel = (
+  privatePusherClient: PusherClient,
+  channel: string
+) => {
+  const Subscription = privatePusherClient.subscribe(
+    channel
+  ) as PresenceChannel;
 
   function bindEvt<T = void>(event: channelEvt, callback: (data: T) => any) {
     return Subscription.bind(event, callback);

@@ -11,6 +11,7 @@ import type { DiceType } from "../../../../types/Dice";
 import { IMapPlus, ISetPlus, MapPlus, SetPlus } from "@carljmcgee/set-map-plus";
 import { User } from "@prisma/client";
 import {
+  privatePusherClient,
   pusherClient,
   useChannel,
   usePresenceChannel,
@@ -61,7 +62,11 @@ const RoomSession: NextPage = () => {
   const genesys = useGenesysResult();
 
   // pusher
-  const { bindEvt, Members } = usePresenceChannel(`presence-${roomId}` ?? "");
+  const pusher = privatePusherClient(player?.id!, player?.charName!);
+  const { bindEvt, Members } = usePresenceChannel(
+    pusher,
+    `presence-${roomId}` ?? ""
+  );
   bindEvt<Members>("pusher:subscription_succeeded", (members) => {
     console.log(members);
     members.each((member: { username: string }) => {
