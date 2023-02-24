@@ -12,7 +12,8 @@ type channelEvt =
   | "rolled"
   | "pusher:subscription_succeeded"
   | "pusher:member_added"
-  | "pusher:member_removed";
+  | "pusher:member_removed"
+  | "pusher:signin_success";
 
 type roomID = string;
 

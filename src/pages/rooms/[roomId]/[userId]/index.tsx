@@ -50,6 +50,27 @@ const RoomSession = () => {
     }
   );
   const pusher = usePrivatePusherClient(userId);
+  pusher.connection.bind(
+    "state_change",
+    (states: { current: string; previous: string }) => {
+      console.log("state:", states);
+      if (states.current === "disconnected") {
+        pusher.connect();
+        pusher.signin();
+      }
+      if (states.current === "connected") {
+        // pusher.signin();
+      }
+    }
+  );
+  useEffect(() => {
+    pusher.user.watchlist.bind("online", (event: unknown) =>
+      console.log("Online", event)
+    );
+    pusher.user.watchlist.bind("offline", (event: unknown) =>
+      console.log("Offline", event)
+    );
+  });
 
   // go dice
   const [dice, requestDie, removeDie] = useDiceSet();
@@ -67,13 +88,12 @@ const RoomSession = () => {
     updateMembers([...(Object.values(members.members) as User[])]);
   });
   bindEvt<Member>("pusher:member_added", (joined) => {
-    updateMembers([...membersList, joined.info]);
-    console.log(membersList);
+    Members.addMember(joined);
+    console.log(Members.members);
   });
   bindEvt<{ user_id: string }>("pusher:member_removed", (departed) => {
-    updateMembers([
-      ...membersList.filter((member) => member.id !== departed.user_id),
-    ]);
+    Members.removeMember(departed);
+    console.log(Members.members);
   });
   bindEvt<User>("player-joined", (player) => {
     // activePlayers.set(player.charName, player);
@@ -158,10 +178,9 @@ const RoomSession = () => {
         {/* player list */}
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
-          {/* {memberSet.size > 0 && ( */}
           <ol>
-            {membersList.length > 0 &&
-              membersList.map((member) => (
+            {Members.count > 0 &&
+              Object.values(Members.members as User[]).map((member: User) => (
                 <li key={member.id}>
                   <h3>{member.charName}</h3>
                 </li>
