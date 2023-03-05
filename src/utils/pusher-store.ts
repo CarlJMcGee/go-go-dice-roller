@@ -6,7 +6,7 @@ import { useState } from "react";
 import { string } from "zod";
 import { UserFull } from "../types/user";
 
-type channelEvt =
+export type channelEvt =
   | "player-joined"
   | "player-left"
   | "rolled"

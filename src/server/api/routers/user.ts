@@ -61,10 +61,14 @@ export const userRouter = createTRPCRouter({
   getOne: publicProcedure
     .input(
       z.object({
-        userId: z.string(),
+        userId: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
+      if (!input.userId) {
+        return null;
+      }
+
       return await ctx.prisma.user.findFirstOrThrow({
         where: {
           id: input.userId,

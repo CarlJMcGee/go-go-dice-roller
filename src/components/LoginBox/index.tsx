@@ -33,7 +33,6 @@ export default function LoginBox() {
       setChar(data);
     },
   });
-  const { mutate: login } = trpc.user.login.useMutation();
 
   // handlers
   const addRoomHandler = (e: React.FormEvent) => {
@@ -157,7 +156,6 @@ export default function LoginBox() {
           <Link
             href={`/rooms/${room.id}/${character.id}`}
             className="m-3 w-1/2 self-center rounded-md bg-teal-500 p-1 text-center hover:bg-teal-300"
-            onClick={() => login({ userId: character.id })}
           >
             <button type="button">Enter Room</button>
           </Link>

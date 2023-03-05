@@ -10,8 +10,8 @@ import DieDisplay from "../../../../components/DieDisplay";
 import type { DiceType } from "../../../../types/Dice";
 import { IMapPlus, ISetPlus, MapPlus, SetPlus } from "@carljmcgee/set-map-plus";
 import { User } from "@prisma/client";
+import PusherClient from "pusher-js";
 import {
-  pusherClient,
   usePresenceChannel,
   usePrivatePusherClient,
 } from "../../../../utils/pusher-store";
@@ -35,74 +35,53 @@ const RoomSession = () => {
   // trpc calls
   const utils = trpc.useContext();
   const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery({
-    roomId: roomId ?? "",
+    roomId: roomId,
   });
   const { data: player, isLoading: userLoading } = trpc.user.getOne.useQuery(
     {
-      userId: userId ?? "",
+      userId: userId,
     },
     {
-      onSuccess: () => {
-        pusher.signin();
-      },
       retry: 3,
       retryDelay: 500,
     }
   );
-  const pusher = usePrivatePusherClient(userId);
-  pusher.connection.bind(
-    "state_change",
-    (states: { current: string; previous: string }) => {
-      console.log("state:", states);
-      if (states.current === "disconnected") {
-        pusher.connect();
-        pusher.signin();
-      }
-      if (states.current === "connected") {
-        // pusher.signin();
-      }
-    }
-  );
-  useEffect(() => {
-    pusher.user.watchlist.bind("online", (event: unknown) =>
-      console.log("Online", event)
-    );
-    pusher.user.watchlist.bind("offline", (event: unknown) =>
-      console.log("Offline", event)
-    );
-  });
 
   // go dice
   const [dice, requestDie, removeDie] = useDiceSet();
   const genesys = useGenesysResult();
 
   // pusher
-  const { bindEvt, Members, Subscription } = usePresenceChannel(
-    pusher,
-    `presence-${roomId}` ?? ""
-  );
-  bindEvt<Members>("pusher:subscription_succeeded", (members) => {
-    console.log(members);
-    console.log(Object.values(members.members));
+  useEffect(() => {
+    const pusher = new PusherClient("91fcd24238f218b740dc", {
+      cluster: "us2",
+      forceTLS: true,
+      channelAuthorization: {
+        endpoint: "/api/pusher/channel-auth",
+        transport: "ajax",
+      },
+      userAuthentication: {
+        endpoint: "/api/pusher/user-auth",
+        transport: "ajax",
+        headers: { userid: userId },
+      },
+    });
 
-    updateMembers([...(Object.values(members.members) as User[])]);
-  });
-  bindEvt<Member>("pusher:member_added", (joined) => {
-    Members.addMember(joined);
-    console.log(Members.members);
-  });
-  bindEvt<{ user_id: string }>("pusher:member_removed", (departed) => {
-    Members.removeMember(departed);
-    console.log(Members.members);
-  });
-  bindEvt<User>("player-joined", (player) => {
-    // activePlayers.set(player.charName, player);
-    utils.user.inRoom.invalidate();
-  });
-  bindEvt<User>("player-left", (player) => {
-    // activePlayers.delete(player.charName);
-    utils.user.inRoom.invalidate();
-  });
+    pusher.connection.bind("state_change", (states: unknown) => {
+      console.log("state: ", states);
+    });
+
+    pusher.signin();
+
+    const sub = pusher.subscribe(`presence-${roomId}`);
+    sub.bind("pusher:subscription_succeeded", (data: Members) => {
+      updateMembers([...(Object.values(data.members) satisfies User[])]);
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     // function handleWindowClose(e: Event) {
@@ -118,8 +97,6 @@ const RoomSession = () => {
       // document.removeEventListener("visibilitychange", handleWindowClose);
       // window.removeEventListener("pagehide", handleWindowClose);
 
-      Subscription.unsubscribe();
-
       dice.forEach((die) => {
         removeDie(die.id);
         die.disconnect();
@@ -131,6 +108,14 @@ const RoomSession = () => {
     return (
       <div>
         <h1>Joining Room Session...</h1>
+      </div>
+    );
+  }
+
+  if (!player || !room) {
+    return (
+      <div>
+        <h1>Error!</h1>
       </div>
     );
   }
@@ -179,14 +164,13 @@ const RoomSession = () => {
         <div className="text-center">
           <h3 className="text-3xl underline">Characters</h3>
           <ol>
-            {Members.count > 0 &&
-              Object.values(Members.members as User[]).map((member: User) => (
+            {membersList.length > 0 &&
+              membersList.map((member: User) => (
                 <li key={member.id}>
                   <h3>{member.charName}</h3>
                 </li>
               ))}
           </ol>
-          {/* )} */}
         </div>
       </div>
       {/* table container */}
