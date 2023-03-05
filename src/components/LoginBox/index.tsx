@@ -63,11 +63,6 @@ export default function LoginBox() {
   });
 
   useEffect(() => {
-    console.log(room);
-    console.log(character);
-  }, [room, character]);
-
-  useEffect(() => {
     if (!characters) {
       return;
     }
