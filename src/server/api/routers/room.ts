@@ -10,10 +10,14 @@ export const roomRouter = createTRPCRouter({
   getOne: publicProcedure
     .input(
       z.object({
-        roomId: z.string(),
+        roomId: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
+      if (!input.roomId) {
+        return null;
+      }
+
       return await ctx.prisma.room.findUniqueOrThrow({
         where: {
           id: input.roomId,

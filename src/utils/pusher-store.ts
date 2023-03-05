@@ -1,23 +1,52 @@
+import { User } from "@prisma/client";
+import { NextApiRequest, NextApiResponse } from "next";
 import PusherServer from "pusher";
-import PusherClient, { Channel } from "pusher-js";
+import PusherClient, { Channel, Members, PresenceChannel } from "pusher-js";
+import { useState } from "react";
+import { string } from "zod";
+import { UserFull } from "../types/user";
 
-type channelEvt = "player-joined" | "player-left" | "rolled";
+export type channelEvt =
+  | "player-joined"
+  | "player-left"
+  | "rolled"
+  | "pusher:subscription_succeeded"
+  | "pusher:member_added"
+  | "pusher:member_removed"
+  | "pusher:signin_success";
 
 type roomID = string;
 
-export const pusherServer = () =>
-  new PusherServer({
-    appId: "1542974",
-    key: "91fcd24238f218b740dc",
-    secret: "6c9fc5e970ea66340bfa",
-    cluster: "us2",
-    useTLS: true,
-  });
+export const pusherServer = new PusherServer({
+  appId: "1542974",
+  key: "91fcd24238f218b740dc",
+  secret: "6c9fc5e970ea66340bfa",
+  cluster: "us2",
+  useTLS: true,
+});
 
 export const pusherClient = new PusherClient("91fcd24238f218b740dc", {
   cluster: "us2",
   forceTLS: true,
 });
+
+export function usePrivatePusherClient(userId: string) {
+  // const [pusher, setPusher] = useState<PusherClient>()
+
+  return new PusherClient("91fcd24238f218b740dc", {
+    cluster: "us2",
+    forceTLS: true,
+    channelAuthorization: {
+      endpoint: "/api/pusher/channel-auth",
+      transport: "ajax",
+    },
+    userAuthentication: {
+      endpoint: "/api/pusher/user-auth",
+      transport: "ajax",
+      headers: { userid: userId },
+    },
+  });
+}
 
 export const useChannel = (
   channel: roomID
@@ -51,6 +80,23 @@ export const useChannel = (
   return { Subscription, BindEvent, BindNRefetch };
 };
 
+export const usePresenceChannel = (
+  privatePusherClient: PusherClient,
+  channel: string
+) => {
+  const Subscription = privatePusherClient.subscribe(
+    channel
+  ) as PresenceChannel;
+
+  function bindEvt<T = void>(event: channelEvt, callback: (data: T) => any) {
+    return Subscription.bind(event, callback);
+  }
+
+  const disconnect = Subscription.disconnect;
+  const Members = Subscription.members;
+  return { Subscription, bindEvt, disconnect, Members };
+};
+
 export async function triggerEvent<D = void>(
   channel: string,
   event: channelEvt,
@@ -67,8 +113,8 @@ export async function triggerEvent<D = void>(
   data: D
 ): Promise<PusherServer.Response | Promise<PusherServer.Response>[]> {
   if (Array.isArray(channel)) {
-    return channel.map((chan) => pusherServer().trigger(chan, event, data));
+    return channel.map((chan) => pusherServer.trigger(chan, event, data));
   }
 
-  return pusherServer().trigger(channel, event, data);
+  return pusherServer.trigger(channel, event, data);
 }

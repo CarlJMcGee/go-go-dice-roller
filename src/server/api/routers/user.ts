@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 // pusher
-import { triggerEvent } from "../../../utils/pusher-store";
+import { pusherServer, triggerEvent } from "../../../utils/pusher-store";
 
 export const userRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -61,10 +61,14 @@ export const userRouter = createTRPCRouter({
   getOne: publicProcedure
     .input(
       z.object({
-        userId: z.string(),
+        userId: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
+      if (!input.userId) {
+        return null;
+      }
+
       return await ctx.prisma.user.findFirstOrThrow({
         where: {
           id: input.userId,
@@ -88,6 +92,7 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.string(),
+        socket_id: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -100,6 +105,14 @@ export const userRouter = createTRPCRouter({
         },
       });
 
+      const userData = {
+        id: user.id,
+        user_info: {
+          username: user.charName,
+        },
+      };
+
+      const auth = pusherServer.authenticateUser(input.socket_id, userData);
       await triggerEvent(user.roomId, "player-joined", user);
     }),
   logout: publicProcedure

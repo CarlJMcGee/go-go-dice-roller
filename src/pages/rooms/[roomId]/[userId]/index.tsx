@@ -1,6 +1,5 @@
-import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
+import type { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
@@ -8,75 +7,104 @@ import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 import DieDisplay from "../../../../components/DieDisplay";
 import type { DiceType } from "../../../../types/Dice";
-import { IMapPlus, ISetPlus, MapPlus, SetPlus } from "@carljmcgee/set-map-plus";
 import { User } from "@prisma/client";
-import { useChannel } from "../../../../utils/pusher-store";
+import PusherClient from "pusher-js";
+import type { Members } from "pusher-js";
+import type { Member } from "../../../../types/pusher";
+import Link from "next/link";
 
-const RoomSession: NextPage = () => {
+const RoomSession = () => {
   // router
   const router = useRouter();
-  interface RoomSessParams extends ParsedUrlQuery {
-    roomId?: string;
-    userId?: string;
-  }
-  const { roomId, userId }: RoomSessParams = router.query;
+  type RoomSessParams = ParsedUrlQuery & {
+    roomId: string;
+    userId: string;
+  };
+  const { roomId, userId } = router.query as RoomSessParams;
 
   // state
   const [diceSet, setDiceSet] = useState<DiceType>("standard");
+  const [membersList, updateMembers] = useState<User[]>([]);
 
   // trpc calls
   const utils = trpc.useContext();
   const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery({
-    roomId: roomId ?? "",
+    roomId: roomId,
   });
   const { data: player, isLoading: userLoading } = trpc.user.getOne.useQuery(
     {
-      userId: userId ?? "",
+      userId: userId,
     },
     {
-      onSuccess(user) {
-        setUserOnline({ userId: user.id });
-      },
+      retry: 3,
+      retryDelay: 500,
     }
   );
-  const { data: activePlayers, refetch: getPlayers } =
-    trpc.user.inRoom.useQuery(
-      { roomId: roomId ?? "" },
-      {
-        refetchInterval: 3000,
-      }
-    );
-  const { mutate: setUserOnline } = trpc.user.login.useMutation();
-  const { mutate: setUserOffline } = trpc.user.logout.useMutation();
 
   // go dice
   const [dice, requestDie, removeDie] = useDiceSet();
   const genesys = useGenesysResult();
 
   // pusher
-  const { BindEvent } = useChannel(roomId ?? "");
-  BindEvent<User>("player-joined", (player) => {
-    // activePlayers.set(player.charName, player);
-    utils.user.inRoom.invalidate();
-  });
-  BindEvent<User>("player-left", (player) => {
-    // activePlayers.delete(player.charName);
-    utils.user.inRoom.invalidate();
-  });
-
   useEffect(() => {
-    function handleWindowClose(e: Event) {
-      if (document.visibilityState === "hidden") {
-        navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
-      }
-    }
+    const pusher = new PusherClient("91fcd24238f218b740dc", {
+      cluster: "us2",
+      forceTLS: true,
+      channelAuthorization: {
+        endpoint: "/api/pusher/channel-auth",
+        transport: "ajax",
+      },
+      userAuthentication: {
+        endpoint: "/api/pusher/user-auth",
+        transport: "ajax",
+        headers: { userid: userId },
+      },
+    });
 
-    document.addEventListener("visibilitychange", handleWindowClose);
-    window.addEventListener("pagehide", handleWindowClose);
+    pusher.connection.bind("state_change", (states: unknown) => {
+      console.log("state: ", states);
+    });
+
+    pusher.signin();
+
+    const sub = pusher.subscribe(`presence-${roomId}`);
+    sub.bind("pusher:subscription_error", (data: unknown) => {
+      console.log(data);
+    });
+    sub.bind("pusher:subscription_succeeded", (data: Members) => {
+      updateMembers([...(Object.values(data.members) satisfies User[])]);
+      console.log(data);
+    });
+    sub.bind("pusher_internal:member_added", (data: Member) => {
+      if (membersList.find((user) => user.id === data.id)) {
+        return;
+      }
+      updateMembers((members) => [...members, data.info]);
+    });
+    sub.bind("pusher_internal:member_removed", (data: Member) => {
+      updateMembers((members) => members.filter((user) => user.id !== data.id));
+    });
 
     return () => {
-      document.removeEventListener("visibilitychange", handleWindowClose);
-      window.removeEventListener("pagehide", handleWindowClose);
+      sub.unsubscribe();
+      sub.disconnect();
+      pusher.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    // function handleWindowClose(e: Event) {
+    //   if (document.visibilityState === "hidden") {
+    //     navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
+    //   }
+    // }
+
+    // document.addEventListener("visibilitychange", handleWindowClose);
+    // window.addEventListener("pagehide", handleWindowClose);
+
+    return () => {
+      // document.removeEventListener("visibilitychange", handleWindowClose);
+      // window.removeEventListener("pagehide", handleWindowClose);
 
       dice.forEach((die) => {
         removeDie(die.id);
@@ -89,6 +117,14 @@ const RoomSession: NextPage = () => {
     return (
       <div>
         <h1>Joining Room Session...</h1>
+      </div>
+    );
+  }
+
+  if (!player || !room) {
+    return (
+      <div>
+        <h1>Error!</h1>
       </div>
     );
   }
@@ -135,14 +171,20 @@ const RoomSession: NextPage = () => {
         </div>
         {/* player list */}
         <div className="text-center">
+          <Link href={"/"}>
+            <button className="m-3 rounded-md bg-blue-400 px-4 py-1 hover:bg-blue-300">
+              Logout
+            </button>
+          </Link>
           <h3 className="text-3xl underline">Characters</h3>
-          {activePlayers && activePlayers?.length > 0 && (
-            <ol>
-              {activePlayers.map(({ charName }) => (
-                <li key={charName}>{charName}</li>
+          <ol>
+            {membersList.length > 0 &&
+              membersList.map((member: User) => (
+                <li key={member.id}>
+                  <h3>{member.charName}</h3>
+                </li>
               ))}
-            </ol>
-          )}
+          </ol>
         </div>
       </div>
       {/* table container */}
