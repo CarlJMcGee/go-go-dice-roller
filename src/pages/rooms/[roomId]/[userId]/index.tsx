@@ -1,6 +1,5 @@
-import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
+import type { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
@@ -8,16 +7,11 @@ import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 import DieDisplay from "../../../../components/DieDisplay";
 import type { DiceType } from "../../../../types/Dice";
-import { IMapPlus, ISetPlus, MapPlus, SetPlus } from "@carljmcgee/set-map-plus";
 import { User } from "@prisma/client";
 import PusherClient from "pusher-js";
-import {
-  usePresenceChannel,
-  usePrivatePusherClient,
-} from "../../../../utils/pusher-store";
-import { Members } from "pusher-js";
-import { Member } from "../../../../types/pusher";
-import { listenerCount } from "events";
+import type { Members } from "pusher-js";
+import type { Member } from "../../../../types/pusher";
+import Link from "next/link";
 
 const RoomSession = () => {
   // router
@@ -74,6 +68,9 @@ const RoomSession = () => {
     pusher.signin();
 
     const sub = pusher.subscribe(`presence-${roomId}`);
+    sub.bind("pusher:subscription_error", (data: unknown) => {
+      console.log(data);
+    });
     sub.bind("pusher:subscription_succeeded", (data: Members) => {
       updateMembers([...(Object.values(data.members) satisfies User[])]);
       console.log(data);
@@ -90,6 +87,8 @@ const RoomSession = () => {
 
     return () => {
       sub.unsubscribe();
+      sub.disconnect();
+      pusher.disconnect();
     };
   }, []);
 
@@ -172,6 +171,11 @@ const RoomSession = () => {
         </div>
         {/* player list */}
         <div className="text-center">
+          <Link href={"/"}>
+            <button className="m-3 rounded-md bg-blue-400 px-4 py-1 hover:bg-blue-300">
+              Logout
+            </button>
+          </Link>
           <h3 className="text-3xl underline">Characters</h3>
           <ol>
             {membersList.length > 0 &&
