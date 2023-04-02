@@ -1,22 +1,25 @@
 import { useEffect, useState } from "react";
-import { diceSet, LED_OFF, LedColor } from "../go-dice-api";
+import { diceSet, Die, LED_OFF, LedColor } from "../go-dice-api";
 
 export function useDiceSet() {
   const [dice, setDice] = useState([]);
 
   useEffect(() => {
     const onDieConnected = (die) => {
+      // @ts-ignore
       setDice((dice) => [...dice, die]);
       die.pulseLed(2, 50, 50, LedColor.BLUE);
     };
 
     diceSet.on("connected", onDieConnected);
+    diceSet.on("reconnected", onDieConnected);
 
     return () => diceSet.off("connected", onDieConnected);
   }, []);
 
-  function removeDie(dieId) {
-    setDice(dice.filter((die) => die.id !== dieId));
+  function removeDie(removedDie) {
+    // removedDie.disconnect();
+    setDice(dice.filter((die) => die.id !== removedDie.id));
   }
 
   return [dice, diceSet.requestDie, removeDie];

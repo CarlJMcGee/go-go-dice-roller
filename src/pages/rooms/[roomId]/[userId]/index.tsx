@@ -6,7 +6,7 @@ import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 import DieDisplay from "../../../../components/DieDisplay";
-import type { DiceType } from "../../../../types/Dice";
+import type { DiceStyles } from "../../../../types/Dice";
 import { User } from "@prisma/client";
 import PusherClient from "pusher-js";
 import type { Members } from "pusher-js";
@@ -23,7 +23,7 @@ const RoomSession = () => {
   const { roomId, userId } = router.query as RoomSessParams;
 
   // state
-  const [diceSet, setDiceSet] = useState<DiceType>("standard");
+  const [diceStyle, setDiceStyle] = useState<DiceStyles>("standard");
   const [membersList, updateMembers] = useState<User[]>([]);
 
   // trpc calls
@@ -113,6 +113,10 @@ const RoomSession = () => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log(dice);
+  }, [dice]);
+
   if (roomLoading || userLoading) {
     return (
       <div>
@@ -162,10 +166,24 @@ const RoomSession = () => {
             <select
               name="dice-type"
               id="dice-type"
-              onChange={(e) => setDiceSet(e.target.value as DiceType)}
+              onChange={(e) => setDiceStyle(e.target.value as DiceStyles)}
             >
-              <option value="standard">Standard</option>
-              <option value="genesys">Genesys</option>
+              <option
+                value="standard"
+                onChange={(e) =>
+                  setDiceStyle(e.currentTarget.value as DiceStyles)
+                }
+              >
+                Standard
+              </option>
+              <option
+                value="genesys"
+                onChange={(e) =>
+                  setDiceStyle(e.currentTarget.value as DiceStyles)
+                }
+              >
+                Genesys
+              </option>
             </select>
           </div>
         </div>
@@ -210,7 +228,7 @@ const RoomSession = () => {
           {dice.map((die, i) => (
             <DieDisplay
               key={die.id}
-              diceSet={diceSet}
+              diceSet={diceStyle}
               die={die}
               index={i}
               inputResult={genesys.inputResult}

@@ -1,1 +1,1 @@
-export type DiceType = "standard" | "genesys";
+export type DiceStyles = "standard" | "genesys";

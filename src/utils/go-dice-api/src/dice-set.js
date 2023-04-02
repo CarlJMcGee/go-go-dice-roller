@@ -19,10 +19,12 @@ GoDice.prototype.onDiceConnected = (dieId, diceInstance) => {
     const die = diceSet.dice[dieId];
     die.instance = diceInstance;
     diceSet.emit("reconnected", die);
+    console.log(`reconnected`);
   } else {
     const die = new Die(dieId, diceInstance);
     diceSet.dice[dieId] = die;
     diceSet.emit("connected", die);
+    console.log(`connected`);
   }
 };
 

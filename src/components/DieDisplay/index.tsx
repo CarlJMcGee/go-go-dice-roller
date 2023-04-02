@@ -10,15 +10,15 @@ import {
 } from "../../utils/go-dice-react";
 import { DieTypes } from "../../utils/go-dice-api/src/die";
 import { useGenesysDie } from "../../utils/go-dice-genesys-hooks";
-import { DiceType } from "../../types/Dice";
+import { DiceStyles } from "../../types/Dice";
 
 export interface IDieDisplayProps {
-  diceSet: DiceType;
+  diceSet: DiceStyles;
   die: Die;
   index: number;
   inputResult: (values: genDieFaces[]) => void;
   setRolled: React.Dispatch<React.SetStateAction<boolean>>;
-  removeDie: (dieId: string) => void;
+  removeDie: (dieId: Die) => void;
 }
 
 export default function DieDisplay({
@@ -93,8 +93,8 @@ export default function DieDisplay({
       <h3
         className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
         onClick={() => {
-          removeDie(die.id);
           die.disconnect();
+          removeDie(die);
         }}
       >
         X
