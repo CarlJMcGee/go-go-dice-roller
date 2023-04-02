@@ -21,7 +21,7 @@ export interface IDieDisplayProps {
   removeDie: (dieId: Die) => void;
 }
 
-export default function DieDisplay({
+export default function GenesysDieDisplay({
   diceSet,
   die,
   index: i,

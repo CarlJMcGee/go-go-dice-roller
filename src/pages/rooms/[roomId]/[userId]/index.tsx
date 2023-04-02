@@ -5,13 +5,14 @@ import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
-import DieDisplay from "../../../../components/DieDisplay";
+import GenesysDieDisplay from "../../../../components/GenesysDieDisplay";
 import type { DiceStyles } from "../../../../types/Dice";
 import { User } from "@prisma/client";
 import PusherClient from "pusher-js";
 import type { Members } from "pusher-js";
 import type { Member } from "../../../../types/pusher";
 import Link from "next/link";
+import StandardDieDisplay from "../../../../components/StandardDieDisplay";
 
 const RoomSession = () => {
   // router
@@ -225,17 +226,23 @@ const RoomSession = () => {
         </div>
         {/* dice */}
         <div className="grid grid-cols-1 items-start md:grid-cols-3">
-          {dice.map((die, i) => (
-            <DieDisplay
-              key={die.id}
-              diceSet={diceStyle}
-              die={die}
-              index={i}
-              inputResult={genesys.inputResult}
-              setRolled={genesys.setRolled}
-              removeDie={removeDie}
-            />
-          ))}
+          {diceStyle === "genesys"
+            ? dice.map((die, i) => (
+                <GenesysDieDisplay
+                  key={die.id}
+                  diceSet={diceStyle}
+                  die={die}
+                  index={i}
+                  inputResult={genesys.inputResult}
+                  setRolled={genesys.setRolled}
+                  removeDie={removeDie}
+                />
+              ))
+            : diceStyle === "standard"
+            ? dice.map((die, i) => (
+                <StandardDieDisplay key={die.id} die={die} index={i} />
+              ))
+            : null}
         </div>
       </div>
     </div>
