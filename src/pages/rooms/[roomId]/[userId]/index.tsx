@@ -162,7 +162,7 @@ const RoomSession = () => {
         {/* player list */}
         <div className="text-center">
           <Link href={"/"}>
-            <button className="m-3 rounded-md bg-blue-400 px-4 py-1 hover:bg-blue-300">
+            <button className="m-3 rounded-md bg-red-400 px-4 py-1 hover:bg-red-300">
               Logout
             </button>
           </Link>
@@ -184,7 +184,6 @@ const RoomSession = () => {
           <Select
             variant="filled"
             value={diceStyle}
-            label="Dice Style"
             data={[
               { value: "standard", label: "Standard" },
               { value: "genesys", label: "Genesys" },
