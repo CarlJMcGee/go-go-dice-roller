@@ -13,6 +13,8 @@ import type { Members } from "pusher-js";
 import type { Member } from "../../../../types/pusher";
 import Link from "next/link";
 import StandardDieDisplay from "../../../../components/StandardDieDisplay";
+import { ActionIcon, Select } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 
 const RoomSession = () => {
   // router
@@ -156,37 +158,6 @@ const RoomSession = () => {
               <li>{roll.outcome}</li>
             ))}
           </ol>
-          {/* die selector */}
-          <div>
-            <button
-              className="m-4 h-12 w-12 self-center rounded-md border-4 border-double border-gray-700 bg-gray-400 text-sm text-white"
-              onClick={() => requestDie()}
-            >
-              Add Die
-            </button>
-            <select
-              name="dice-type"
-              id="dice-type"
-              onChange={(e) => setDiceStyle(e.target.value as DiceStyles)}
-            >
-              <option
-                value="standard"
-                onChange={(e) =>
-                  setDiceStyle(e.currentTarget.value as DiceStyles)
-                }
-              >
-                Standard
-              </option>
-              <option
-                value="genesys"
-                onChange={(e) =>
-                  setDiceStyle(e.currentTarget.value as DiceStyles)
-                }
-              >
-                Genesys
-              </option>
-            </select>
-          </div>
         </div>
         {/* player list */}
         <div className="text-center">
@@ -208,6 +179,21 @@ const RoomSession = () => {
       </div>
       {/* table container */}
       <div className="tableTex mx-auto mb-10  min-h-screen  w-11/12 rounded-md md:w-4/5">
+        {/* die selector */}
+        <div className=" flex justify-center p-2">
+          <Select
+            variant="filled"
+            value={diceStyle}
+            label="Dice Style"
+            data={[
+              { value: "standard", label: "Standard" },
+              { value: "genesys", label: "Genesys" },
+            ]}
+            onChange={(value) =>
+              setDiceStyle((value as DiceStyles) ?? "standard")
+            }
+          />
+        </div>
         {/* die outcome display */}
         <div className="flex justify-center text-center text-4xl text-white">
           {genesys.rolled && (
@@ -246,6 +232,13 @@ const RoomSession = () => {
               />
             ) : null
           )}
+          <ActionIcon
+            size={"xl"}
+            className="m-1 flex h-52 w-52 flex-col justify-center justify-self-center border-4 bg-slate-300 p-3"
+            onClick={() => requestDie()}
+          >
+            <IconPlus size={"100%"} />
+          </ActionIcon>
         </div>
       </div>
     </div>
