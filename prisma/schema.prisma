@@ -31,10 +31,11 @@ model Room {
 }
 
 model DieRoll {
-    id      String @id @default(cuid())
+    id      String   @id @default(cuid())
     outcome String
     userId  String
-    user    User   @relation(fields: [userId], references: [id])
+    user    User     @relation(fields: [userId], references: [id])
     roomId  String
-    room    Room   @relation(fields: [roomId], references: [id])
+    room    Room     @relation(fields: [roomId], references: [id])
+    created DateTime @default(now())
 }

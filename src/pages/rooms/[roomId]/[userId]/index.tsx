@@ -13,8 +13,9 @@ import type { Members } from "pusher-js";
 import type { Member } from "../../../../types/pusher";
 import Link from "next/link";
 import StandardDieDisplay from "../../../../components/StandardDieDisplay";
-import { ActionIcon, Select } from "@mantine/core";
+import { ActionIcon, Select, Spoiler } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
+import { arrNumBetween } from "@carljmcgee/lol-random";
 
 const RoomSession = () => {
   // router
@@ -153,11 +154,6 @@ const RoomSession = () => {
           <h2 className="text-center text-2xl">
             Player Name: {player?.playerName}
           </h2>
-          <ol className="flex flex-col justify-center">
-            {player?.dieRolls.map((roll) => (
-              <li>{roll.outcome}</li>
-            ))}
-          </ol>
         </div>
         {/* player list */}
         <div className="text-center">
@@ -178,66 +174,82 @@ const RoomSession = () => {
         </div>
       </div>
       {/* table container */}
-      <div className="tableTex mx-auto mb-10  min-h-screen  w-11/12 rounded-md md:w-4/5">
-        {/* die selector */}
-        <div className=" flex justify-center p-2">
-          <Select
-            variant="filled"
-            value={diceStyle}
-            data={[
-              { value: "standard", label: "Standard" },
-              { value: "genesys", label: "Genesys" },
-            ]}
-            onChange={(value) =>
-              setDiceStyle((value as DiceStyles) ?? "standard")
-            }
-          />
+      <div className="tableTex mx-auto mb-10 flex min-h-screen w-11/12 flex-col  items-center rounded-md md:flex md:w-4/5 md:flex-row md:items-start md:justify-center">
+        {/* party rolls */}
+        <div className="my-3 mr-3 w-1/2 bg-gray-400 bg-opacity-75 text-center text-white md:w-1/3">
+          <h3 className="text-4xl underline">Party Rolls</h3>
+          <Spoiler maxHeight={120} showLabel="Older Rolls" hideLabel="Hide">
+            <ul>
+              {room.dieRolls.map((roll) => (
+                <li>{roll.outcome}</li>
+              ))}
+              {arrNumBetween(15, 1, 20).map((value) => (
+                <li>{value}</li>
+              ))}
+            </ul>
+          </Spoiler>
         </div>
-        {/* die outcome display */}
-        <div className="flex justify-center text-center text-4xl text-white">
-          {genesys.rolled && (
-            <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${
-              genesys.sideEffects && `with ${genesys.sideEffects}`
-            }`}</h3>
-          )}
-          {genesys.rolled && (
-            <button
-              className="rounded-md bg-gray-400 px-2 py-1 hover:bg-gray-600"
-              onClick={() => genesys.resetResults()}
+        <div>
+          {/* die selector */}
+          <div className=" flex justify-center p-2">
+            <Select
+              variant="filled"
+              value={diceStyle}
+              data={[
+                { value: "standard", label: "Standard" },
+                { value: "genesys", label: "Genesys" },
+              ]}
+              onChange={(value) =>
+                setDiceStyle((value as DiceStyles) ?? "standard")
+              }
+            />
+          </div>
+          {/* die outcome display */}
+          <div className="flex justify-center text-center text-4xl text-white">
+            {genesys.rolled && (
+              <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${
+                genesys.sideEffects && `with ${genesys.sideEffects}`
+              }`}</h3>
+            )}
+            {genesys.rolled && (
+              <button
+                className="rounded-md bg-gray-400 px-2 py-1 hover:bg-gray-600"
+                onClick={() => genesys.resetResults()}
+              >
+                Reset
+              </button>
+            )}
+          </div>
+          {/* dice */}
+          <div className="grid grid-cols-1 items-start md:grid-cols-2">
+            {dice.map((die, i) =>
+              diceStyle === "standard" ? (
+                <StandardDieDisplay
+                  key={die.id}
+                  die={die}
+                  index={i}
+                  removeDie={removeDie}
+                />
+              ) : diceStyle === "genesys" ? (
+                <GenesysDieDisplay
+                  key={die.id}
+                  diceSet={diceStyle}
+                  die={die}
+                  index={i}
+                  inputResult={genesys.inputResult}
+                  setRolled={genesys.setRolled}
+                  removeDie={removeDie}
+                />
+              ) : null
+            )}
+            <ActionIcon
+              size={"xl"}
+              className="m-1 flex h-52 w-52 flex-col justify-center justify-self-center border-4 bg-slate-300 p-3"
+              onClick={() => requestDie()}
             >
-              Reset
-            </button>
-          )}
-        </div>
-        {/* dice */}
-        <div className="grid grid-cols-1 items-start md:grid-cols-3">
-          {dice.map((die, i) =>
-            diceStyle === "standard" ? (
-              <StandardDieDisplay
-                key={die.id}
-                die={die}
-                index={i}
-                removeDie={removeDie}
-              />
-            ) : diceStyle === "genesys" ? (
-              <GenesysDieDisplay
-                key={die.id}
-                diceSet={diceStyle}
-                die={die}
-                index={i}
-                inputResult={genesys.inputResult}
-                setRolled={genesys.setRolled}
-                removeDie={removeDie}
-              />
-            ) : null
-          )}
-          <ActionIcon
-            size={"xl"}
-            className="m-1 flex h-52 w-52 flex-col justify-center justify-self-center border-4 bg-slate-300 p-3"
-            onClick={() => requestDie()}
-          >
-            <IconPlus size={"100%"} />
-          </ActionIcon>
+              <IconPlus size={"100%"} />
+            </ActionIcon>
+          </div>
         </div>
       </div>
     </div>
