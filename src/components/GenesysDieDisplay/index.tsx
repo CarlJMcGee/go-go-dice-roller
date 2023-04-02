@@ -18,7 +18,7 @@ export interface IDieDisplayProps {
   index: number;
   inputResult: (values: genDieFaces[]) => void;
   setRolled: React.Dispatch<React.SetStateAction<boolean>>;
-  removeDie: (dieId: Die) => void;
+  removeDie: (dieId: string) => void;
 }
 
 export default function GenesysDieDisplay({
@@ -94,7 +94,7 @@ export default function GenesysDieDisplay({
         className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
         onClick={() => {
           die.disconnect();
-          removeDie(die);
+          removeDie(die.id);
         }}
       >
         X

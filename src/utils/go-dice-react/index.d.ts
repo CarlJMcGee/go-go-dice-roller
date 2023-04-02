@@ -3,7 +3,7 @@ import { DiceSet, Die } from "../go-dice-api";
 export function useDiceSet(): [
   dice: Die[],
   requestDie: DiceSet["requestDie"],
-  removeDie: (dieId: Die) => void
+  removeDie: (dieId: string) => void
 ];
 
 export function useDieColor(die: Die): string;

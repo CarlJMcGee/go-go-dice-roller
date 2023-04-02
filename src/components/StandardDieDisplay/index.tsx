@@ -6,12 +6,14 @@ import {
   useRolling,
   useDieColor,
   useBatteryLevel,
+  useConnectionStatus,
 } from "../../utils/go-dice-react";
 import type { DieTypes } from "../../utils/go-dice-api/src/die";
 
 export interface IDieDisplayProps {
   die: Die;
   index: number;
+  removeDie: (dieId: string) => void;
 }
 
 const borderColorMap = MapPlus<string, string>([
@@ -31,11 +33,16 @@ const bgColorMap = MapPlus<string, string>([
   ["Orange", "bg-orange-200"],
 ]);
 
-export default function DieDisplay({ die, index: i }: IDieDisplayProps) {
+export default function DieDisplay({
+  die,
+  index: i,
+  removeDie,
+}: IDieDisplayProps) {
   const [label, setLabel] = useState(`Die #${i + 1}`);
   const [editing, setEditing] = useState(false);
   const [dieType, setDieType] = useState<DieTypes>("D6");
 
+  const connected = useConnectionStatus(die);
   const batteryLvl = useBatteryLevel(die);
   const dieColor = useDieColor(die);
   const rolling = useRolling(die);
@@ -45,6 +52,12 @@ export default function DieDisplay({ die, index: i }: IDieDisplayProps) {
     die.setDieType(dieType);
   }, [dieType]);
 
+  useEffect(() => {
+    if (!connected) {
+      removeDie(die.id);
+    }
+  }, [connected]);
+
   return (
     <div
       className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${
@@ -53,6 +66,15 @@ export default function DieDisplay({ die, index: i }: IDieDisplayProps) {
         dieColor ? bgColorMap.get(dieColor) : "bg-gray-200"
       }  m-3 h-52 w-52 p-3`}
     >
+      <h3
+        className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
+        onClick={() => {
+          die.disconnect();
+          removeDie(die.id);
+        }}
+      >
+        X
+      </h3>
       <div className="text-center">
         {editing ? (
           <input

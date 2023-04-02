@@ -226,23 +226,26 @@ const RoomSession = () => {
         </div>
         {/* dice */}
         <div className="grid grid-cols-1 items-start md:grid-cols-3">
-          {diceStyle === "genesys"
-            ? dice.map((die, i) => (
-                <GenesysDieDisplay
-                  key={die.id}
-                  diceSet={diceStyle}
-                  die={die}
-                  index={i}
-                  inputResult={genesys.inputResult}
-                  setRolled={genesys.setRolled}
-                  removeDie={removeDie}
-                />
-              ))
-            : diceStyle === "standard"
-            ? dice.map((die, i) => (
-                <StandardDieDisplay key={die.id} die={die} index={i} />
-              ))
-            : null}
+          {dice.map((die, i) =>
+            diceStyle === "standard" ? (
+              <StandardDieDisplay
+                key={die.id}
+                die={die}
+                index={i}
+                removeDie={removeDie}
+              />
+            ) : diceStyle === "genesys" ? (
+              <GenesysDieDisplay
+                key={die.id}
+                diceSet={diceStyle}
+                die={die}
+                index={i}
+                inputResult={genesys.inputResult}
+                setRolled={genesys.setRolled}
+                removeDie={removeDie}
+              />
+            ) : null
+          )}
         </div>
       </div>
     </div>
