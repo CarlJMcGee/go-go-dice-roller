@@ -15,6 +15,7 @@ import Link from "next/link";
 import StandardDieDisplay from "../../../../components/StandardDieDisplay";
 import { ActionIcon, ScrollArea, Select, Spoiler } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
+import moment from "moment";
 
 const RoomSession = () => {
   // router
@@ -115,10 +116,6 @@ const RoomSession = () => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(dice);
-  }, [dice]);
-
   if (roomLoading || userLoading) {
     return (
       <div>
@@ -176,18 +173,22 @@ const RoomSession = () => {
         {/* party rolls */}
         <div className="my-3 mr-3 w-1/2 bg-gray-400 bg-opacity-75 text-center text-white md:w-1/3">
           <h3 className="text-4xl underline">Party Rolls</h3>
-          <Spoiler maxHeight={120} showLabel="Show More" hideLabel="Hide">
-            <ScrollArea h={500}>
-              <ul>
-                {partyRolls.length > 0 &&
-                  partyRolls.map((roll) => (
-                    <li key={roll.id}>
-                      {roll.user.charName}: {roll.outcome}
-                    </li>
-                  ))}
-              </ul>
-            </ScrollArea>
-          </Spoiler>
+          {/* <Spoiler maxHeight={170} showLabel="Show More" hideLabel="Hide"> */}
+          <ScrollArea h={250} type="always">
+            <ul className="pl-5 pt-2 text-left">
+              {partyRolls.length > 0 &&
+                partyRolls.map((roll) => (
+                  <li key={roll.id}>
+                    {roll.user.charName} rolled{" "}
+                    <span className="font-bold text-lime-300">
+                      {roll.outcome}
+                    </span>{" "}
+                    {moment(roll.created).fromNow()}
+                  </li>
+                ))}
+            </ul>
+          </ScrollArea>
+          {/* </Spoiler> */}
         </div>
         <div>
           {/* die selector */}
