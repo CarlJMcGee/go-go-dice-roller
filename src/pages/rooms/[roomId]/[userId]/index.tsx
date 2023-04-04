@@ -6,16 +6,15 @@ import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 import GenesysDieDisplay from "../../../../components/GenesysDieDisplay";
-import type { DiceStyles } from "../../../../types/Dice";
-import { User } from "@prisma/client";
+import type { DiceStyles, DieRollFull } from "../../../../types/Dice";
+import { DieRoll, User } from "@prisma/client";
 import PusherClient from "pusher-js";
 import type { Members } from "pusher-js";
 import type { Member } from "../../../../types/pusher";
 import Link from "next/link";
 import StandardDieDisplay from "../../../../components/StandardDieDisplay";
-import { ActionIcon, Select, Spoiler } from "@mantine/core";
+import { ActionIcon, ScrollArea, Select, Spoiler } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-import { arrNumBetween } from "@carljmcgee/lol-random";
 
 const RoomSession = () => {
   // router
@@ -29,12 +28,24 @@ const RoomSession = () => {
   // state
   const [diceStyle, setDiceStyle] = useState<DiceStyles>("standard");
   const [membersList, updateMembers] = useState<User[]>([]);
+  const [partyRolls, setPartyRolls] = useState<DieRollFull[]>([]);
 
   // trpc calls
   const utils = trpc.useContext();
-  const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery({
-    roomId: roomId,
-  });
+  const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery(
+    {
+      roomId: roomId,
+    },
+    {
+      onSuccess(data) {
+        if (!data?.dieRolls) {
+          return;
+        }
+
+        setPartyRolls(data?.dieRolls);
+      },
+    }
+  );
   const { data: player, isLoading: userLoading } = trpc.user.getOne.useQuery(
     {
       userId: userId,
@@ -65,10 +76,6 @@ const RoomSession = () => {
       },
     });
 
-    pusher.connection.bind("state_change", (states: unknown) => {
-      console.log("state: ", states);
-    });
-
     pusher.signin();
 
     const sub = pusher.subscribe(`presence-${roomId}`);
@@ -77,7 +84,6 @@ const RoomSession = () => {
     });
     sub.bind("pusher:subscription_succeeded", (data: Members) => {
       updateMembers([...(Object.values(data.members) satisfies User[])]);
-      console.log(data);
     });
     sub.bind("pusher_internal:member_added", (data: Member) => {
       if (membersList.find((user) => user.id === data.id)) {
@@ -89,6 +95,10 @@ const RoomSession = () => {
       updateMembers((members) => members.filter((user) => user.id !== data.id));
     });
 
+    sub.bind("rolled", (roll: DieRollFull) => {
+      setPartyRolls((partyRolls) => [roll, ...partyRolls]);
+    });
+
     return () => {
       sub.unsubscribe();
       sub.disconnect();
@@ -97,19 +107,7 @@ const RoomSession = () => {
   }, []);
 
   useEffect(() => {
-    // function handleWindowClose(e: Event) {
-    //   if (document.visibilityState === "hidden") {
-    //     navigator.sendBeacon("/api/logout", `${userId} ${roomId}`);
-    //   }
-    // }
-
-    // document.addEventListener("visibilitychange", handleWindowClose);
-    // window.addEventListener("pagehide", handleWindowClose);
-
     return () => {
-      // document.removeEventListener("visibilitychange", handleWindowClose);
-      // window.removeEventListener("pagehide", handleWindowClose);
-
       dice.forEach((die) => {
         removeDie(die.id);
         die.disconnect();
@@ -178,15 +176,17 @@ const RoomSession = () => {
         {/* party rolls */}
         <div className="my-3 mr-3 w-1/2 bg-gray-400 bg-opacity-75 text-center text-white md:w-1/3">
           <h3 className="text-4xl underline">Party Rolls</h3>
-          <Spoiler maxHeight={120} showLabel="Older Rolls" hideLabel="Hide">
-            <ul>
-              {room.dieRolls.map((roll) => (
-                <li>{roll.outcome}</li>
-              ))}
-              {arrNumBetween(15, 1, 20).map((value) => (
-                <li>{value}</li>
-              ))}
-            </ul>
+          <Spoiler maxHeight={120} showLabel="Show More" hideLabel="Hide">
+            <ScrollArea h={500}>
+              <ul>
+                {partyRolls.length > 0 &&
+                  partyRolls.map((roll) => (
+                    <li key={roll.id}>
+                      {roll.user.charName}: {roll.outcome}
+                    </li>
+                  ))}
+              </ul>
+            </ScrollArea>
           </Spoiler>
         </div>
         <div>
@@ -228,6 +228,8 @@ const RoomSession = () => {
                   key={die.id}
                   die={die}
                   index={i}
+                  userId={userId}
+                  roomId={roomId}
                   removeDie={removeDie}
                 />
               ) : diceStyle === "genesys" ? (

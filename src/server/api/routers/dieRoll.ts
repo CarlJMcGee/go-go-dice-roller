@@ -1,6 +1,7 @@
 import { DieRoll } from "@prisma/client";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { triggerEvent } from "../../../utils/pusher-store";
 
 export const dieRollRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -16,6 +17,9 @@ export const dieRollRouter = createTRPCRouter({
       return ctx.prisma.dieRoll.findMany({
         where: {
           roomId: input.roomId,
+        },
+        orderBy: {
+          created: "desc",
         },
         include: {
           user: {
@@ -41,7 +45,18 @@ export const dieRollRouter = createTRPCRouter({
         data: {
           ...input,
         },
+        include: {
+          user: {
+            select: {
+              charName: true,
+              playerName: true,
+              id: true,
+            },
+          },
+        },
       });
+
+      await triggerEvent(`presence-${roll.roomId}`, "rolled", roll);
 
       return { msg: `roll of ${roll.outcome}` };
     }),

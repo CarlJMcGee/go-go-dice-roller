@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { trpc } from "../../utils/api";
 import { MapPlus } from "@carljmcgee/set-map-plus";
 import { Die, LedColor } from "../../utils/go-dice-api";
 import {
@@ -13,6 +14,8 @@ import type { DieTypes } from "../../utils/go-dice-api/src/die";
 export interface IDieDisplayProps {
   die: Die;
   index: number;
+  userId: string;
+  roomId: string;
   removeDie: (dieId: string) => void;
 }
 
@@ -36,11 +39,16 @@ const bgColorMap = MapPlus<string, string>([
 export default function DieDisplay({
   die,
   index: i,
+  userId,
+  roomId,
   removeDie,
 }: IDieDisplayProps) {
   const [label, setLabel] = useState(`Die #${i + 1}`);
   const [editing, setEditing] = useState(false);
   const [dieType, setDieType] = useState<DieTypes>("D6");
+
+  // trpc
+  const { mutate: sendRoll } = trpc.dieRoll.add.useMutation();
 
   const connected = useConnectionStatus(die);
   const batteryLvl = useBatteryLevel(die);
@@ -57,6 +65,10 @@ export default function DieDisplay({
       removeDie(die.id);
     }
   }, [connected]);
+
+  useEffect(() => {
+    sendRoll({ outcome: value, roomId: roomId, userId: userId });
+  }, [value]);
 
   return (
     <div

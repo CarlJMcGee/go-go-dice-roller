@@ -25,10 +25,23 @@ export const roomRouter = createTRPCRouter({
         include: {
           players: {
             include: {
-              dieRolls: true,
+              dieRolls: {
+                orderBy: { created: "desc" },
+              },
             },
           },
-          dieRolls: true,
+          dieRolls: {
+            orderBy: { created: "desc" },
+            include: {
+              user: {
+                select: {
+                  charName: true,
+                  playerName: true,
+                  id: true,
+                },
+              },
+            },
+          },
         },
       });
     }),
