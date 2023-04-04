@@ -10,6 +10,7 @@ import {
   useConnectionStatus,
 } from "../../utils/go-dice-react";
 import type { DieTypes } from "../../utils/go-dice-api/src/die";
+import { CloseButton, Group } from "@mantine/core";
 
 export interface IDieDisplayProps {
   die: Die;
@@ -78,7 +79,16 @@ export default function DieDisplay({
         dieColor ? bgColorMap.get(dieColor) : "bg-gray-200"
       }  m-3 h-52 w-52 p-3`}
     >
-      <h3
+      <Group position="right">
+        <CloseButton
+          color="red"
+          onClick={() => {
+            die.disconnect();
+            removeDie(die.id);
+          }}
+        />
+      </Group>
+      {/* <h3
         className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
         onClick={() => {
           die.disconnect();
@@ -86,7 +96,7 @@ export default function DieDisplay({
         }}
       >
         X
-      </h3>
+      </h3> */}
       <div className="text-center">
         {editing ? (
           <input

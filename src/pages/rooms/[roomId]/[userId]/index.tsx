@@ -7,7 +7,7 @@ import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 import GenesysDieDisplay from "../../../../components/GenesysDieDisplay";
 import type { DiceStyles, DieRollFull } from "../../../../types/Dice";
-import { DieRoll, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import PusherClient from "pusher-js";
 import type { Members } from "pusher-js";
 import type { Member } from "../../../../types/pusher";
@@ -173,22 +173,30 @@ const RoomSession = () => {
         {/* party rolls */}
         <div className="my-3 mr-3 w-1/2 bg-gray-400 bg-opacity-75 text-center text-white md:w-1/3">
           <h3 className="text-4xl underline">Party Rolls</h3>
-          {/* <Spoiler maxHeight={170} showLabel="Show More" hideLabel="Hide"> */}
           <ScrollArea h={250} type="always">
             <ul className="pl-5 pt-2 text-left">
               {partyRolls.length > 0 &&
                 partyRolls.map((roll) => (
                   <li key={roll.id}>
                     {roll.user.charName} rolled{" "}
-                    <span className="font-bold text-lime-300">
+                    <span
+                      className={`font-bold ${
+                        roll.outcome === "20"
+                          ? "text-green-500"
+                          : roll.outcome === "1"
+                          ? "text-red-400"
+                          : "text-yellow-300"
+                      }`}
+                    >
                       {roll.outcome}
                     </span>{" "}
-                    {moment(roll.created).fromNow()}
+                    <span className="text-xs">
+                      ({moment(roll.created).fromNow()})
+                    </span>
                   </li>
                 ))}
             </ul>
           </ScrollArea>
-          {/* </Spoiler> */}
         </div>
         <div>
           {/* die selector */}
