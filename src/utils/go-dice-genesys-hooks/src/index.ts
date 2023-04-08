@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Die } from "go-dice-api";
+import { Die } from "../../go-dice-api/index.js";
 import { MapPlus } from "@carljmcgee/set-map-plus";
 
 export type posDieFaces = "success" | "advantage" | "triumph" | "blank";
@@ -146,6 +146,7 @@ export function useGenesysDie(die: Die, dieType: genDieTypes): genDieFaces[] {
 
     setGenValue(GenValueMap.get(dieType)(value));
 
+    // @ts-ignore
     return () => die.off("value", onValue);
   }, [value]);
 

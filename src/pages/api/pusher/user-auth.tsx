@@ -1,5 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { trpc } from "../../../utils/api";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { pusherServer } from "../../../utils/pusher-store";
 
 export default async function handler(
@@ -17,7 +16,7 @@ export default async function handler(
 }
 
 async function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
-  const { socket_id } = req.body;
+  const { socket_id } = req.body as { socket_id: string };
   const { userid } = req.headers as {
     userid: string;
   };
