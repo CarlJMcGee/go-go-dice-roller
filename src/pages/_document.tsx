@@ -1,10 +1,13 @@
 import { Html, Head, Main, NextScript } from "next/document";
+import Script from "next/script";
 
 export default function Document() {
   return (
     <Html>
       <Head>
-        <script src="./godice.js"></script>
+        <Script id="go-dice-src" src="./godice.js">
+          {" "}
+        </Script>
         <script>window.GoDice = GoDice</script>
       </Head>
       <body>

@@ -1,19 +1,17 @@
 import { MapPlus } from "@carljmcgee/set-map-plus";
-import { Die } from "../../utils/go-dice-api";
+import type { Die } from "../../utils/go-dice-api";
 import { useEffect, useState } from "react";
-import { genDieFaces, genDieTypes } from "../../types/genesysDice";
+import type { genDieFaces, genDieTypes } from "../../types/genesysDice";
 import {
   useBatteryLevel,
   useConnectionStatus,
   useDieColor,
   useRolling,
 } from "../../utils/go-dice-react";
-import { DieTypes } from "../../utils/go-dice-api/src/die";
+import type { DieTypes } from "../../utils/go-dice-api/src/die";
 import { useGenesysDie } from "../../utils/go-dice-genesys-hooks";
-import { DiceStyles } from "../../types/Dice";
 
 export interface IDieDisplayProps {
-  diceSet: DiceStyles;
   die: Die;
   index: number;
   inputResult: (values: genDieFaces[]) => void;
@@ -22,7 +20,6 @@ export interface IDieDisplayProps {
 }
 
 export default function GenesysDieDisplay({
-  diceSet,
   die,
   index: i,
   inputResult,
@@ -50,7 +47,7 @@ export default function GenesysDieDisplay({
 
   useEffect(() => {
     die.setDieType(genToDFace[dieType]);
-  }, [dieType]);
+  }, [dieType, die, genToDFace]);
 
   useEffect(() => {
     if (!value || value[0] === "blank") {
@@ -85,10 +82,10 @@ export default function GenesysDieDisplay({
 
   return (
     <div
-      className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${borderColorMap.get(
-        dieType
-      )} 
-        ${bgColorMap.get(dieType)}`}
+      className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${
+        borderColorMap.get(dieType) ?? ""
+      } 
+        ${bgColorMap.get(dieType) ?? ""}`}
     >
       <h3
         className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
@@ -110,7 +107,7 @@ export default function GenesysDieDisplay({
                 setEditing(false);
               }
             }}
-            onBlur={(e) => {
+            onBlur={() => {
               setEditing(false);
             }}
             className={`w-5/6 bg-transparent`}
@@ -122,7 +119,7 @@ export default function GenesysDieDisplay({
           name="dieType"
           id="dieType"
           className={`border-2 bg-transparent bg-black bg-opacity-20 text-center ${
-            dieColor && borderColorMap.get(dieColor)
+            dieColor && (borderColorMap.get(dieColor) ?? "")
           } hover:bg-black hover:bg-opacity-30`}
           onChange={(e) => setDieType(e.target.value as genDieTypes)}
         >

@@ -1,10 +1,5 @@
-import { User } from "@prisma/client";
-import { NextApiRequest, NextApiResponse } from "next";
 import PusherServer from "pusher";
-import PusherClient, { Channel, Members, PresenceChannel } from "pusher-js";
-import { useState } from "react";
-import { string } from "zod";
-import { UserFull } from "../types/user";
+import PusherClient, { Channel, PresenceChannel } from "pusher-js";
 
 export type channelEvt =
   | "player-joined"

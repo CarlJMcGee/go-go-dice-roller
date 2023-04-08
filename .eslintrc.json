@@ -4,7 +4,10 @@
       "extends": [
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
       ],
-      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "@typescript-eslint/unbound-method": "off"
+      },
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "parserOptions": {
         "project": "tsconfig.json"
       }
