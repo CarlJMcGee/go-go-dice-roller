@@ -2,17 +2,40 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+    previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "postgresql"
     url      = env("DATABASE_URL")
 }
 
-model user {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    name      String
+model User {
+    id         String    @id @default(cuid())
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+    loggedIn   Boolean   @default(false)
+    playerName String
+    charName   String    @unique
+    roomId     String
+    room       Room      @relation(fields: [roomId], references: [id])
+    dieRolls   DieRoll[]
+}
+
+model Room {
+    id       String    @id @default(cuid())
+    name     String    @unique
+    players  User[]
+    dieRolls DieRoll[]
+}
+
+model DieRoll {
+    id      String   @id @default(cuid())
+    outcome String
+    userId  String
+    user    User     @relation(fields: [userId], references: [id])
+    roomId  String
+    room    Room     @relation(fields: [roomId], references: [id])
+    created DateTime @default(now())
 }

@@ -1,0 +1,37 @@
+{
+  "name": "go-dice-genesys-hooks",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "React hooks for Go Dice to be used as Fantasy Flight Genesys TTRPG dice.",
+  "exports": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CarlJMcGee/go-dice-genesys-hooks.git"
+  },
+  "keywords": [
+    "go-dice",
+    "GoDice",
+    "smart-dice",
+    "api",
+    "ttrpg",
+    "rpg",
+    "genesys",
+    "fantasy-flight"
+  ],
+  "author": "CarlJMcGee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CarlJMcGee/go-dice-genesys-hooks/issues"
+  },
+  "homepage": "https://github.com/CarlJMcGee/go-dice-genesys-hooks#readme",
+  "devDependencies": {
+    "@types/react": "^18.0.26",
+    "go-dice-api": "^0.4.0"
+  },
+  "peerDependencies": {
+    "go-dice-api": "^0.4.0"
+  },
+  "dependencies": {
+    "@carljmcgee/set-map-plus": "^1.0.1"
+  }
+}
