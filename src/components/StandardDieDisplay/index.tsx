@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { trpc } from "../../utils/api";
 import { MapPlus } from "@carljmcgee/set-map-plus";
-import { Die, LedColor } from "../../utils/go-dice-api";
+import { Die } from "../../utils/go-dice-api";
 import {
   useDieValue,
   useRolling,
@@ -74,9 +74,9 @@ export default function DieDisplay({
   return (
     <div
       className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${
-        dieColor ? borderColorMap.get(dieColor) : "border-white"
+        dieColor ? borderColorMap.get(dieColor) ?? "" : "border-white"
       } ${
-        dieColor ? bgColorMap.get(dieColor) : "bg-gray-200"
+        dieColor ? bgColorMap.get(dieColor) ?? "" : "bg-gray-200"
       }  m-3 h-52 w-52 p-3`}
     >
       <Group position="right">
@@ -120,7 +120,7 @@ export default function DieDisplay({
           name="dieType"
           id="dieType"
           className={`border-2 bg-transparent bg-black bg-opacity-20 ${
-            dieColor && borderColorMap.get(dieColor)
+            dieColor && (borderColorMap.get(dieColor) ?? "")
           } hover:bg-black hover:bg-opacity-30`}
           onChange={(e) => setDieType(e.target.value as DieTypes)}
         >
