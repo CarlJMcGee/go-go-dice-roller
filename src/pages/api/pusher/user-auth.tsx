@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { pusherServer } from "../../../utils/pusher-store";
+import { prisma } from "../../../server/db";
 
 export default async function handler(
   req: NextApiRequest,
