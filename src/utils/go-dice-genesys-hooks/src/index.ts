@@ -137,7 +137,7 @@ const GenValueMap = MapPlus<genDieTypes, (value: string) => genDieFaces[]>([
   ["setback", setbackDieValue],
 ]);
 
-export function useGenesysDie(die: Die, dieType: genDieTypes): genDieFaces[] {
+export function useGenesysDie(die: Die, dieType: genDieTypes) {
   const [value, setValue] = useState<string | undefined>();
   const [genValue, setGenValue] = useState<genDieFaces[]>();
   useEffect(() => {
