@@ -144,7 +144,9 @@ export function useGenesysDie(die: Die, dieType: genDieTypes): genDieFaces[] {
     const onValue = (value: string) => setValue(value);
     die.on("value", onValue);
 
-    setGenValue(GenValueMap.get(dieType)(value));
+    if (GenValueMap.has(dieType)) {
+      setGenValue(GenValueMap.get(dieType)(value));
+    }
 
     // @ts-ignore
     return () => die.off("value", onValue);
