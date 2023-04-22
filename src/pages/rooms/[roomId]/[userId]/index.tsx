@@ -1,21 +1,21 @@
-import { useRouter } from "next/router";
 import type { ParsedUrlQuery } from "querystring";
+import type { DiceStyles, DieRollFull } from "../../../../types/Dice";
+import type { Members } from "pusher-js";
+import type { Member } from "../../../../types/pusher";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
 import GenesysDieDisplay from "../../../../components/GenesysDieDisplay";
-import type { DiceStyles, DieRollFull } from "../../../../types/Dice";
 import { User } from "@prisma/client";
 import PusherClient from "pusher-js";
-import type { Members } from "pusher-js";
-import type { Member } from "../../../../types/pusher";
 import Link from "next/link";
 import StandardDieDisplay from "../../../../components/StandardDieDisplay";
-import { ActionIcon, ScrollArea, Select, Spoiler } from "@mantine/core";
+import { ActionIcon, Select } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-import moment from "moment";
+import RollsRTCDisplay from "../../../../components/RollsRTCDisplay";
 
 const RoomSession = () => {
   // router
@@ -136,27 +136,27 @@ const RoomSession = () => {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-[#ffeecb]">
       <div className="flex justify-between">
         {/* header container */}
-        <div className="flex flex-col justify-center">
+        <div className="m-2 flex flex-col justify-center">
           <Head>
             <title>
               {room?.name}: {player?.charName}
             </title>
           </Head>
-          <h1 className="text-center text-4xl">{room?.name}</h1>
-          <h2 className="text-center text-2xl">
+          <h1 className="text-center text-4xl text-[#2f4858]">{room?.name}</h1>
+          <h2 className="text-center text-2xl text-[#2f4858]">
             Character Name: {player?.charName}
           </h2>
-          <h2 className="text-center text-2xl">
+          <h2 className="text-center text-2xl text-[#2f4858]">
             Player Name: {player?.playerName}
           </h2>
         </div>
         {/* player list */}
-        <div className="text-center">
+        <div className="m-2 text-center text-[#2f4858]">
           <Link href={"/"}>
-            <button className="m-3 rounded-md bg-red-400 px-4 py-1 hover:bg-red-300">
+            <button className="m-3 rounded-md bg-red-400 px-4 py-1 text-[#dfe0df] hover:bg-red-300 hover:text-[#402e32]">
               Logout
             </button>
           </Link>
@@ -173,34 +173,8 @@ const RoomSession = () => {
       </div>
       {/* table container */}
       <div className="tableTex mx-auto mb-10 flex min-h-screen w-11/12 flex-col  items-center rounded-md md:flex md:w-4/5 md:flex-row md:items-start md:justify-center">
-        {/* party rolls */}
-        <div className="my-3 mr-3 w-1/2 bg-gray-400 bg-opacity-75 text-center text-white md:w-1/3">
-          <h3 className="text-4xl underline">Party Rolls</h3>
-          <ScrollArea h={250} type="always">
-            <ul className="pl-5 pt-2 text-left">
-              {partyRolls.length > 0 &&
-                partyRolls.map((roll) => (
-                  <li key={roll.id}>
-                    {roll.user.charName} rolled{" "}
-                    <span
-                      className={`font-bold ${
-                        roll.outcome === "20"
-                          ? "text-green-500"
-                          : roll.outcome === "1"
-                          ? "text-red-400"
-                          : "text-yellow-300"
-                      }`}
-                    >
-                      {roll.outcome}
-                    </span>{" "}
-                    <span className="text-xs">
-                      ({moment(roll.created).fromNow()})
-                    </span>
-                  </li>
-                ))}
-            </ul>
-          </ScrollArea>
-        </div>
+        {/* party rolls RTC */}
+        <RollsRTCDisplay rolls={partyRolls} />
         <div>
           {/* die selector */}
           <div className=" flex justify-center p-2">
@@ -255,6 +229,7 @@ const RoomSession = () => {
                 />
               ) : null
             )}
+            {/* add die button  */}
             <ActionIcon
               size={"xl"}
               className="m-1 flex h-52 w-52 flex-col justify-center justify-self-center border-4 bg-slate-300 p-3"
