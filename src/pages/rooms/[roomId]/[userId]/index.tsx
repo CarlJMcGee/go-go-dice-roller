@@ -16,6 +16,7 @@ import StandardDieDisplay from "../../../../components/StandardDieDisplay";
 import { ActionIcon, ScrollArea, Select, Spoiler } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import moment from "moment";
+import RollsRTCDisplay from "../../../../components/RollsRTCDisplay";
 
 const RoomSession = () => {
   // router
@@ -170,34 +171,8 @@ const RoomSession = () => {
       </div>
       {/* table container */}
       <div className="tableTex mx-auto mb-10 flex min-h-screen w-11/12 flex-col  items-center rounded-md md:flex md:w-4/5 md:flex-row md:items-start md:justify-center">
-        {/* party rolls */}
-        <div className="my-3 mr-3 w-1/2 bg-gray-400 bg-opacity-75 text-center text-white md:w-1/3">
-          <h3 className="text-4xl underline">Party Rolls</h3>
-          <ScrollArea h={250} type="always">
-            <ul className="pl-5 pt-2 text-left">
-              {partyRolls.length > 0 &&
-                partyRolls.map((roll) => (
-                  <li key={roll.id}>
-                    {roll.user.charName} rolled{" "}
-                    <span
-                      className={`font-bold ${
-                        roll.outcome === "20"
-                          ? "text-green-500"
-                          : roll.outcome === "1"
-                          ? "text-red-400"
-                          : "text-yellow-300"
-                      }`}
-                    >
-                      {roll.outcome}
-                    </span>{" "}
-                    <span className="text-xs">
-                      ({moment(roll.created).fromNow()})
-                    </span>
-                  </li>
-                ))}
-            </ul>
-          </ScrollArea>
-        </div>
+        {/* party rolls RTC */}
+        <RollsRTCDisplay rolls={partyRolls} />
         <div>
           {/* die selector */}
           <div className=" flex justify-center p-2">
