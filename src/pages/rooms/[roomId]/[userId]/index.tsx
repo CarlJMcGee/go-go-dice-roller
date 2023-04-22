@@ -227,6 +227,7 @@ const RoomSession = () => {
                 />
               ) : null
             )}
+            {/* add die button  */}
             <ActionIcon
               size={"xl"}
               className="m-1 flex h-52 w-52 flex-col justify-center justify-self-center border-4 bg-slate-300 p-3"
