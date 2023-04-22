@@ -83,16 +83,19 @@ const RoomSession = () => {
     sub.bind("pusher:subscription_error", (data: unknown) => {
       console.log(data);
     });
-    sub.bind("pusher:subscription_succeeded", (data: Members) => {
-      updateMembers([...(Object.values(data.members) satisfies User[])]);
-    });
-    sub.bind("pusher_internal:member_added", (data: Member) => {
+    sub.bind(
+      "pusher:subscription_succeeded",
+      (data: { members: { [s: string]: User } }) => {
+        updateMembers([...Object.values(data.members)]);
+      }
+    );
+    sub.bind("pusher:member_added", (data: Member) => {
       if (membersList.find((user) => user.id === data.id)) {
         return;
       }
       updateMembers((members) => [...members, data.info]);
     });
-    sub.bind("pusher_internal:member_removed", (data: Member) => {
+    sub.bind("pusher:member_removed", (data: Member) => {
       updateMembers((members) => members.filter((user) => user.id !== data.id));
     });
 
@@ -218,7 +221,6 @@ const RoomSession = () => {
               ) : diceStyle === "genesys" ? (
                 <GenesysDieDisplay
                   key={die.id}
-                  diceSet={diceStyle}
                   die={die}
                   index={i}
                   inputResult={genesys.inputResult}

@@ -1,10 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { pusherServer } from "../../../utils/pusher-store";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case "POST":
       pusherAuth(req, res);
@@ -16,7 +13,10 @@ export default async function handler(
 }
 
 function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
-  const { socket_id, channel_name } = req.body;
+  const { socket_id, channel_name } = req.body as {
+    socket_id: string;
+    channel_name: string;
+  };
 
   try {
     const auth = pusherServer.authorizeChannel(socket_id, channel_name);

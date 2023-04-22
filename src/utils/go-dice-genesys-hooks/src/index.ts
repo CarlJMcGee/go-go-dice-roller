@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Die } from "go-dice-api";
+import { Die } from "../../go-dice-api/index.js";
 import { MapPlus } from "@carljmcgee/set-map-plus";
 
 export type posDieFaces = "success" | "advantage" | "triumph" | "blank";
@@ -137,15 +137,19 @@ const GenValueMap = MapPlus<genDieTypes, (value: string) => genDieFaces[]>([
   ["setback", setbackDieValue],
 ]);
 
-export function useGenesysDie(die: Die, dieType: genDieTypes): genDieFaces[] {
+export function useGenesysDie(die: Die, dieType: genDieTypes) {
   const [value, setValue] = useState<string | undefined>();
   const [genValue, setGenValue] = useState<genDieFaces[]>();
   useEffect(() => {
     const onValue = (value: string) => setValue(value);
     die.on("value", onValue);
 
-    setGenValue(GenValueMap.get(dieType)(value));
+    const dieValueHandler = GenValueMap.get(dieType);
+    if (dieValueHandler && value) {
+      setGenValue(dieValueHandler(value));
+    }
 
+    // @ts-ignore
     return () => die.off("value", onValue);
   }, [value]);
 

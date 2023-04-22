@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { trpc } from "../../../utils/api";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { pusherServer } from "../../../utils/pusher-store";
+import { prisma } from "../../../server/db";
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,7 +17,7 @@ export default async function handler(
 }
 
 async function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
-  const { socket_id } = req.body;
+  const { socket_id } = req.body as { socket_id: string };
   const { userid } = req.headers as {
     userid: string;
   };

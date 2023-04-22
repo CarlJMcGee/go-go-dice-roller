@@ -22,7 +22,7 @@ type DieTypes = "D6" | "D20" | "D10" | "D10X" | "D4" | "D8" | "D12";
 export default class Die extends EventEmitter {
   static Color: Color;
 
-  readonly id;
+  readonly id: string;
 
   new(id: string, instance: DieInstance);
 

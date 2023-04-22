@@ -1,4 +1,4 @@
-import { Autocomplete, Input } from "@mantine/core";
+import { Autocomplete } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import type { Room, User } from "@prisma/client";
 import Link from "next/link";
@@ -17,17 +17,15 @@ export default function LoginBox() {
 
   // queries & mutations
   const { mutate: addRoom } = trpc.room.add.useMutation({
-    onSuccess(data) {
+    async onSuccess(data) {
       setRoom(data);
       setCharacters(data.players);
-      utils.room.findRoom.invalidate();
+      await utils.room.findRoom.invalidate();
     },
   });
-  const {
-    data: searchRes,
-    isLoading: searchResLoading,
-    refetch: search,
-  } = trpc.room.findRoom.useQuery({ search: roomName });
+  const { data: searchRes, refetch: search } = trpc.room.findRoom.useQuery({
+    search: roomName,
+  });
   const { mutate: addCharacter } = trpc.user.add.useMutation({
     onSuccess(data) {
       setChar(data);
@@ -70,7 +68,7 @@ export default function LoginBox() {
       "playerName",
       characters?.find(
         (player) => player.charName === playerForm.values.charName
-      )?.playerName!
+      )?.playerName ?? ""
     );
   }, [playerForm.values.charName]);
 
@@ -90,9 +88,11 @@ export default function LoginBox() {
             value={roomName}
             data={searchRes?.map((room) => room.name) ?? []}
             placeholder="Room Name"
-            onChange={(e) => {
-              setRoomName(e);
-              search();
+            onChange={(value) => {
+              setRoomName(value);
+              search().catch((err) => {
+                if (err) throw err;
+              });
             }}
           />
           <button
