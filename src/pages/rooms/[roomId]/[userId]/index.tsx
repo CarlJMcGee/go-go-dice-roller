@@ -16,6 +16,7 @@ import StandardDieDisplay from "../../../../components/StandardDieDisplay";
 import { ActionIcon, Select } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import RollsRTCDisplay from "../../../../components/RollsRTCDisplay";
+import Dice from "../../../../components/Dice";
 
 const RoomSession = () => {
   // router
@@ -208,27 +209,20 @@ const RoomSession = () => {
           </div>
           {/* dice */}
           <div className="grid grid-cols-1 items-start md:grid-cols-2">
-            {dice.map((die, i) =>
-              diceStyle === "standard" ? (
-                <StandardDieDisplay
-                  key={die.id}
-                  die={die}
-                  index={i}
-                  userId={userId}
-                  roomId={roomId}
-                  removeDie={removeDie}
-                />
-              ) : diceStyle === "genesys" ? (
-                <GenesysDieDisplay
-                  key={die.id}
-                  die={die}
-                  index={i}
-                  inputResult={genesys.inputResult}
-                  setRolled={genesys.setRolled}
-                  removeDie={removeDie}
-                />
-              ) : null
-            )}
+            {/* real dice */}
+            {dice.map((die, i) => (
+              <Dice
+                key={die.id}
+                diceStyle={diceStyle}
+                die={die}
+                index={i}
+                userId={userId}
+                roomId={roomId}
+                inputResult={genesys.inputResult}
+                removeDie={removeDie}
+                setRolled={genesys.setRolled}
+              />
+            ))}
             {/* add die button  */}
             <ActionIcon
               size={"xl"}
