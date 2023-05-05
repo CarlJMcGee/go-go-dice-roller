@@ -7,6 +7,7 @@ interface FakeDiceProps {
   index: number;
   diceStyle: DiceStyles;
   removeDie: (die: FakeDie) => void;
+  sess: [roomId: string, userId: string];
 }
 
 export default function FakeDice({
@@ -15,6 +16,7 @@ export default function FakeDice({
   index,
   key,
   removeDie,
+  sess,
 }: FakeDiceProps) {
   return diceStyle === "standard" ? (
     <StandardFakeDieDisplay
@@ -22,6 +24,7 @@ export default function FakeDice({
       index={index}
       key={key}
       removeDie={removeDie}
+      sess={sess}
     />
   ) : diceStyle === "genesys" ? (
     <GenesysFakeDieDisplay die={die} index={index} key={key} />

@@ -1,13 +1,18 @@
 import { CloseButton, Group } from "@mantine/core";
 import { FakeDie, FakeDieColors } from "../../types/Dice";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DieTypes } from "../../utils/go-dice-api/src/die";
+import { numBetween } from "@carljmcgee/lol-random";
+import { trpc } from "../../utils/api";
+import rollingGif from "../../media/dice-roll.gif";
+import Image from "next/image";
 
 interface StandardFakeDieDisplayProps {
   die: FakeDie;
   key: string;
   index: number;
   removeDie: (die: FakeDie) => void;
+  sess: [roomId: string, userId: string];
 }
 
 export default function StandardFakeDieDisplay({
@@ -15,13 +20,18 @@ export default function StandardFakeDieDisplay({
   key,
   index,
   removeDie,
+  sess,
 }: StandardFakeDieDisplayProps) {
   // state
+  const [dieColor, setColor] = useState<FakeDieColors>("white");
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(die.label);
   const [dieType, setDieType] = useState<DieTypes>("D6");
   const [rolling, setRolling] = useState(false);
   const [value, setValue] = useState<string>();
+
+  // trpc
+  const { mutate: sendRoll } = trpc.dieRoll.add.useMutation();
 
   const bgColor: Record<FakeDieColors, string> = {
     white: "bg-gray-300",
@@ -41,11 +51,34 @@ export default function StandardFakeDieDisplay({
     blue: "border-blue-500",
   };
 
+  const dieSides: Record<DieTypes, number> = {
+    D6: 6,
+    D4: 4,
+    D8: 8,
+    D10: 10,
+    D10X: 10,
+    D12: 12,
+    D20: 20,
+  };
+
+  async function rollDie() {
+    setRolling(true);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setValue(numBetween(1, dieSides[dieType]).toString());
+    setRolling(false);
+  }
+
+  useEffect(() => {
+    if (!value) {
+      return;
+    }
+
+    sendRoll({ outcome: value, roomId: sess[0], userId: sess[1] });
+  }, [value]);
+
   return (
     <div
-      className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${
-        bgColor[die.color]
-      } ${borderColor[die.color]}`}
+      className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 px-3 pb-3 ${bgColor[dieColor]} ${borderColor[dieColor]}`}
     >
       <Group position="right">
         <CloseButton
@@ -74,27 +107,59 @@ export default function StandardFakeDieDisplay({
         ) : (
           <h2 onClick={() => setEditing(true)}>{label}</h2>
         )}
-        <select
-          name="dieType"
-          id="dieType"
-          className={`border-2 bg-transparent bg-black bg-opacity-20 ${
-            borderColor[die.color]
-          } hover:bg-black hover:bg-opacity-30`}
-          onChange={(e) => setDieType(e.target.value as DieTypes)}
-        >
-          <option value="D6" defaultChecked>
-            D6
-          </option>
-          <option value="D4">D4</option>
-          <option value="D8">D8</option>
-          <option value="D10">D10</option>
-          <option value="D12">D12</option>
-          <option value="D10X">D10X</option>
-          <option value="D20">D20</option>
-        </select>
+        <Group position="center">
+          <select
+            name="dieType"
+            id="dieType"
+            className={`border-2 bg-transparent bg-black bg-opacity-20 ${borderColor[dieColor]} hover:bg-black hover:bg-opacity-30`}
+            onChange={(e) => setDieType(e.target.value as DieTypes)}
+          >
+            <option value="D6" defaultChecked>
+              D6
+            </option>
+            <option value="D4">D4</option>
+            <option value="D8">D8</option>
+            <option value="D10">D10</option>
+            <option value="D12">D12</option>
+            <option value="D10X">D10X</option>
+            <option value="D20">D20</option>
+          </select>
+          <select
+            name="dieColor"
+            id="dieColor"
+            onChange={(e) => setColor(e.currentTarget.value as FakeDieColors)}
+          >
+            <option value="white" className="text-black">
+              White
+            </option>
+            <option value="red" className="text-red-500">
+              Red
+            </option>
+            <option value="orange" className="text-orange-500">
+              Orange
+            </option>
+            <option value="yellow" className="text-yellow-500">
+              Yellow
+            </option>
+            <option value="green" className="text-green-500">
+              Green
+            </option>
+            <option value="blue" className="text-blue-500">
+              Blue
+            </option>
+          </select>
+        </Group>
       </div>
+      <button
+        className={`m-2 w-1/2 self-center rounded-md bg-[#00b4ff] ${borderColor[dieColor]}`}
+        onClick={rollDie}
+      >
+        Roll
+      </button>
       <div className="flex h-full items-center justify-center text-center">
-        {rolling ? <h3 className="text-4xl">Rolling...</h3> : null}
+        {rolling ? (
+          <Image src={rollingGif} alt="rolling" width={50} height={50} />
+        ) : null}
         {!rolling && value ? (
           <h3 className="text-7xl text-black">{value}</h3>
         ) : null}

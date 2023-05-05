@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { trpc } from "../../utils/api";
 import { MapPlus } from "@carljmcgee/set-map-plus";
 import { Die } from "../../utils/go-dice-api";
@@ -11,6 +12,7 @@ import {
 } from "../../utils/go-dice-react";
 import type { DieTypes } from "../../utils/go-dice-api/src/die";
 import { CloseButton, Group } from "@mantine/core";
+import rollingGif from "../../media/dice-roll.gif";
 
 export interface IDieDisplayProps {
   die: Die;
@@ -73,7 +75,7 @@ export default function DieDisplay({
 
   return (
     <div
-      className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${
+      className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 px-3 pb-3 ${
         dieColor ? borderColorMap.get(dieColor) ?? "" : "border-white"
       } ${dieColor ? bgColorMap.get(dieColor) ?? "" : "bg-gray-200"}`}
     >
@@ -123,21 +125,29 @@ export default function DieDisplay({
           <option value="D10X">D10X</option>
           <option value="D20">D20</option>
         </select>
-        <h3>
-          Battery currently at{" "}
-          <span
-            className={`font-semibold ${
-              batteryLvl && batteryLvl > 10
-                ? "text-black"
-                : "animate-pulse text-red-500"
-            }`}
-          >
-            {batteryLvl}%
-          </span>
-        </h3>
+        {batteryLvl === 100 ? (
+          <h3>
+            Battery <span className="font-semibold">100%</span>
+          </h3>
+        ) : (
+          <h3>
+            Battery currently at{" "}
+            <span
+              className={`font-semibold ${
+                batteryLvl && batteryLvl > 10
+                  ? "text-black"
+                  : "animate-pulse text-red-500"
+              }`}
+            >
+              {batteryLvl}%
+            </span>
+          </h3>
+        )}{" "}
       </div>
       <div className="flex h-full items-center justify-center text-center">
-        {rolling ? <h3 className="text-4xl">Rolling...</h3> : null}
+        {rolling ? (
+          <Image src={rollingGif} alt="rolling" width={50} height={50} />
+        ) : null}
         {!rolling && value ? (
           <h3 className="text-7xl text-black">{value}</h3>
         ) : null}

@@ -245,6 +245,7 @@ const RoomSession = () => {
                 index={i}
                 diceStyle={diceStyle}
                 removeDie={removeFakeDie}
+                sess={[roomId, userId]}
               />
             ))}
             {/* add die button  */}
