@@ -63,7 +63,7 @@ export default function StandardFakeDieDisplay({
 
   async function rollDie() {
     setRolling(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((res) => setTimeout(res, 1000));
     setValue(numBetween(1, dieSides[dieType]).toString());
     setRolling(false);
   }
@@ -152,7 +152,7 @@ export default function StandardFakeDieDisplay({
       </div>
       <button
         className={`m-2 w-1/2 self-center rounded-md bg-[#00b4ff] ${borderColor[dieColor]}`}
-        onClick={rollDie}
+        onClick={() => rollDie()}
       >
         Roll
       </button>
