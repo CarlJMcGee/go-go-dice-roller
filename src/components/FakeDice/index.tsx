@@ -26,7 +26,8 @@ export default function FakeDice({
       removeDie={removeDie}
       sess={sess}
     />
-  ) : diceStyle === "genesys" ? (
-    <GenesysFakeDieDisplay die={die} index={index} key={key} />
-  ) : null;
+  ) : // TODO: add genesys component
+  // ) : diceStyle === "genesys" ? (
+  //   <GenesysFakeDieDisplay die={die} index={index} key={key} />
+  null;
 }
