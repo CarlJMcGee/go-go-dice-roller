@@ -75,9 +75,7 @@ export default function DieDisplay({
     <div
       className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${
         dieColor ? borderColorMap.get(dieColor) ?? "" : "border-white"
-      } ${
-        dieColor ? bgColorMap.get(dieColor) ?? "" : "bg-gray-200"
-      }  m-3 h-52 w-52 p-3`}
+      } ${dieColor ? bgColorMap.get(dieColor) ?? "" : "bg-gray-200"}`}
     >
       <Group position="right">
         <CloseButton
@@ -88,15 +86,6 @@ export default function DieDisplay({
           }}
         />
       </Group>
-      {/* <h3
-        className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
-        onClick={() => {
-          die.disconnect();
-          removeDie(die.id);
-        }}
-      >
-        X
-      </h3> */}
       <div className="text-center">
         {editing ? (
           <input
@@ -146,7 +135,6 @@ export default function DieDisplay({
             {batteryLvl}%
           </span>
         </h3>
-        {/* <h3>Color: {dieColor}</h3> */}
       </div>
       <div className="flex h-full items-center justify-center text-center">
         {rolling ? <h3 className="text-4xl">Rolling...</h3> : null}

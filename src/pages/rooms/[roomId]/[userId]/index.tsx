@@ -1,5 +1,5 @@
 import type { ParsedUrlQuery } from "querystring";
-import type { DiceStyles, DieRollFull } from "../../../../types/Dice";
+import type { DiceStyles, DieRollFull, FakeDie } from "../../../../types/Dice";
 import type { Members } from "pusher-js";
 import type { Member } from "../../../../types/pusher";
 import { useRouter } from "next/router";
@@ -13,10 +13,13 @@ import { User } from "@prisma/client";
 import PusherClient from "pusher-js";
 import Link from "next/link";
 import StandardDieDisplay from "../../../../components/StandardDieDisplay";
-import { ActionIcon, Select } from "@mantine/core";
+import { ActionIcon, Menu, Select } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import RollsRTCDisplay from "../../../../components/RollsRTCDisplay";
 import Dice from "../../../../components/Dice";
+import FakeDice from "../../../../components/FakeDice";
+import { randomUUID } from "crypto";
+import { numBetween } from "@carljmcgee/lol-random";
 
 const RoomSession = () => {
   // router
@@ -31,6 +34,7 @@ const RoomSession = () => {
   const [diceStyle, setDiceStyle] = useState<DiceStyles>("standard");
   const [membersList, updateMembers] = useState<User[]>([]);
   const [partyRolls, setPartyRolls] = useState<DieRollFull[]>([]);
+  const [diceMenu, setDiceMenu] = useState(false);
 
   // trpc calls
   const utils = trpc.useContext();
@@ -61,6 +65,12 @@ const RoomSession = () => {
   // go dice
   const [dice, requestDie, removeDie] = useDiceSet();
   const genesys = useGenesysResult();
+
+  // fake dice
+  const [fakeDice, setFakeDice] = useState<FakeDie[]>([]);
+  function removeFakeDie(die: FakeDie) {
+    setFakeDice((fakeDice) => fakeDice.filter((d) => d !== die));
+  }
 
   // pusher
   useEffect(() => {
@@ -119,6 +129,10 @@ const RoomSession = () => {
       });
     };
   }, []);
+
+  useEffect(() => {
+    console.log(diceMenu);
+  }, [diceMenu]);
 
   if (roomLoading || userLoading) {
     return (
@@ -223,13 +237,60 @@ const RoomSession = () => {
                 setRolled={genesys.setRolled}
               />
             ))}
+            {/* fake dice */}
+            {fakeDice.map((die, i) => (
+              <FakeDice
+                key={die.id}
+                die={die}
+                index={i}
+                diceStyle={diceStyle}
+                removeDie={removeFakeDie}
+              />
+            ))}
             {/* add die button  */}
             <ActionIcon
               size={"xl"}
               className="m-1 flex h-52 w-52 flex-col justify-center justify-self-center border-4 bg-slate-300 p-3"
-              onClick={() => requestDie()}
             >
-              <IconPlus size={"100%"} />
+              <IconPlus
+                size={"100%"}
+                onClick={() => setDiceMenu((value) => !value)}
+              />
+              <Menu
+                opened={diceMenu}
+                onChange={setDiceMenu}
+                closeOnClickOutside={true}
+                closeOnItemClick={true}
+                width={"100%"}
+                transition={"pop"}
+              >
+                <Menu.Dropdown>
+                  <Menu.Label>Add Die</Menu.Label>
+                  <Menu.Item
+                    onClick={() => {
+                      setDiceMenu((value) => !value);
+                      requestDie();
+                    }}
+                  >
+                    GoDice
+                  </Menu.Item>
+                  <Menu.Item
+                    onClick={() => {
+                      setDiceMenu((value) => !value);
+                      setFakeDice((dice) => [
+                        ...dice,
+                        {
+                          id: numBetween(1, 999999).toString(),
+                          color: "white",
+                          label: "new die",
+                        },
+                      ]);
+                    }}
+                  >
+                    Digital Die
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
             </ActionIcon>
           </div>
         </div>
