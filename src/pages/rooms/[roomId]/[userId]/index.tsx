@@ -20,6 +20,8 @@ import Dice from "../../../../components/Dice";
 import FakeDice from "../../../../components/FakeDice";
 import { randomUUID } from "crypto";
 import { numBetween } from "@carljmcgee/lol-random";
+import { useAtom } from "jotai";
+import {DiceSetAtom, GenesysUtilsAtom} from "../../../../utils/jotaiStore"
 
 const RoomSession = () => {
   // router
@@ -63,8 +65,11 @@ const RoomSession = () => {
   );
 
   // go dice
-  const [dice, requestDie, removeDie] = useDiceSet();
-  const genesys = useGenesysResult();
+  const [diceSet, setDiceSet] = useAtom(DiceSetAtom)
+  setDiceSet(useDiceSet())
+  const [dice, requestDie, removeDie] = diceSet
+  const [genesys, setGenUtils] = useAtom(GenesysUtilsAtom)
+  setGenUtils(useGenesysResult())
 
   // fake dice
   const [fakeDice, setFakeDice] = useState<FakeDie[]>([]);
