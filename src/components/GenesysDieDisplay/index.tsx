@@ -10,6 +10,7 @@ import {
 } from "../../utils/go-dice-react";
 import type { DieTypes } from "../../utils/go-dice-api/src/die";
 import { useGenesysDie } from "../../utils/go-dice-genesys-hooks";
+import { CloseButton, Group } from "@mantine/core";
 
 export interface IDieDisplayProps {
   die: Die;
@@ -87,15 +88,14 @@ export default function GenesysDieDisplay({
       } 
         ${bgColorMap.get(dieType) ?? ""}`}
     >
-      <h3
-        className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
-        onClick={() => {
-          die.disconnect();
-          removeDie(die.id);
-        }}
-      >
-        X
-      </h3>
+      <Group position="right">
+        <CloseButton
+          color="red"
+          onClick={() => {
+            removeDie(die.id);
+          }}
+        />
+      </Group>
       <div className="text-center">
         {editing ? (
           <input

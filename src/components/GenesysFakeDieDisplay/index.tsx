@@ -9,6 +9,7 @@ import {
   proficiencyDie,
   setbackDie,
 } from "../../utils/go-dice-genesys-hooks";
+import { CloseButton, Group } from "@mantine/core";
 
 interface GenesysFakeDieDisplayProps {
   die: FakeDie;
@@ -108,14 +109,14 @@ export default function GenesysFakeDieDisplay({
       } 
         ${bgColorMap.get(dieType) ?? ""}`}
     >
-      <h3
-        className="mt-0 text-right text-xl text-red-500 hover:cursor-pointer"
-        onClick={() => {
-          removeDie(die);
-        }}
-      >
-        X
-      </h3>
+      <Group position="right">
+        <CloseButton
+          color="red"
+          onClick={() => {
+            removeDie(die);
+          }}
+        />
+      </Group>
       <div className="text-center">
         {editing ? (
           <input
