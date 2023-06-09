@@ -20,6 +20,7 @@ import Dice from "../../../../components/Dice";
 import FakeDice from "../../../../components/FakeDice";
 import { randomUUID } from "crypto";
 import { numBetween } from "@carljmcgee/lol-random";
+import GenesysResultDisplay from "../../../../components/GenesysResultDisplay";
 
 const RoomSession = () => {
   // router
@@ -206,7 +207,8 @@ const RoomSession = () => {
             />
           </div>
           {/* die outcome display */}
-          <div className="flex justify-center text-center text-4xl text-white">
+          <GenesysResultDisplay genesys={genesys} />
+          {/* <div className="flex justify-center text-center text-4xl text-white">
             {genesys.rolled && (
               <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${
                 genesys.sideEffects && `with ${genesys.sideEffects}`
@@ -220,7 +222,7 @@ const RoomSession = () => {
                 Reset
               </button>
             )}
-          </div>
+          </div> */}
           {/* dice */}
           <div className="grid grid-cols-1 items-start md:grid-cols-2">
             {/* real dice */}
@@ -243,6 +245,8 @@ const RoomSession = () => {
                 key={die.id}
                 die={die}
                 index={i}
+                inputResult={genesys.inputResult}
+                setRolled={genesys.setRolled}
                 diceStyle={diceStyle}
                 removeDie={removeFakeDie}
                 sess={[roomId, userId]}
