@@ -131,10 +131,6 @@ const RoomSession = () => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(diceMenu);
-  }, [diceMenu]);
-
   if (roomLoading || userLoading) {
     return (
       <div>
@@ -207,7 +203,11 @@ const RoomSession = () => {
             />
           </div>
           {/* die outcome display */}
-          <GenesysResultDisplay genesys={genesys} />
+          <GenesysResultDisplay
+            genesys={genesys}
+            roomId={roomId}
+            userId={userId}
+          />
           {/* <div className="flex justify-center text-center text-4xl text-white">
             {genesys.rolled && (
               <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${

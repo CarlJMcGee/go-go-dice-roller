@@ -41,7 +41,27 @@ export const dieRollRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const roll: DieRoll = await ctx.prisma.dieRoll.create({
+      // check if input.outcome string contains "success" and replace with "S"
+      if (input.outcome.includes("Success")) {
+        input.outcome = input.outcome.replace("Success", "Succ");
+      }
+      if (input.outcome.includes("Failure")) {
+        input.outcome = input.outcome.replace("Failure", "Fail");
+      }
+      if (input.outcome.includes("Advantage")) {
+        input.outcome = input.outcome.replace("Advantage", "Adv");
+      }
+      if (input.outcome.includes("Disadvantage")) {
+        input.outcome = input.outcome.replace("Disadvantage", "Dis");
+      }
+      if (input.outcome.includes("Triumphant")) {
+        input.outcome = input.outcome.replace("Triumphant", "Trph");
+      }
+      if (input.outcome.includes("Despair")) {
+        input.outcome = input.outcome.replace("Despair", "Des");
+      }
+
+      const newRoll: DieRoll = await ctx.prisma.dieRoll.create({
         data: {
           ...input,
         },
@@ -56,8 +76,8 @@ export const dieRollRouter = createTRPCRouter({
         },
       });
 
-      await triggerEvent(`presence-${roll.roomId}`, "rolled", roll);
+      await triggerEvent(`presence-${newRoll.roomId}`, "rolled", newRoll);
 
-      return { msg: `roll of ${roll.outcome}` };
+      return { msg: `roll of ${newRoll.outcome}` };
     }),
 });
