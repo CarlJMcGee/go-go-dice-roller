@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { trpc } from "../../utils/api";
 import { MapPlus } from "@carljmcgee/set-map-plus";
-import { Die } from "../../utils/go-dice-api";
+import type { Die } from "../../utils/go-dice-api";
 import {
   useDieValue,
   useRolling,
@@ -99,7 +99,7 @@ export default function DieDisplay({
                 setEditing(false);
               }
             }}
-            onBlur={(e) => {
+            onBlur={() => {
               setEditing(false);
             }}
             className={`w-5/6 bg-transparent`}

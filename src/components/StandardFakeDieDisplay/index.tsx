@@ -1,7 +1,7 @@
 import { CloseButton, Group } from "@mantine/core";
-import { FakeDie, FakeDieColors } from "../../types/Dice";
+import type { FakeDie, FakeDieColors } from "../../types/Dice";
 import { useState, useEffect } from "react";
-import { DieTypes } from "../../utils/go-dice-api/src/die";
+import type { DieTypes } from "../../utils/go-dice-api/src/die";
 import { numBetween } from "@carljmcgee/lol-random";
 import { trpc } from "../../utils/api";
 import rollingGif from "../../media/dice-roll.gif";
@@ -9,16 +9,12 @@ import Image from "next/image";
 
 interface StandardFakeDieDisplayProps {
   die: FakeDie;
-  key: string;
-  index: number;
   removeDie: (die: FakeDie) => void;
   sess: [roomId: string, userId: string];
 }
 
 export default function StandardFakeDieDisplay({
   die,
-  key,
-  index,
   removeDie,
   sess,
 }: StandardFakeDieDisplayProps) {

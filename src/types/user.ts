@@ -1,4 +1,4 @@
-import { DieRoll, Room, User } from "@prisma/client";
+import type { DieRoll, Room, User } from "@prisma/client";
 
 export type UserFull = User & {
   room: Room & {

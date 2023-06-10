@@ -1,4 +1,3 @@
-import { Room } from "@prisma/client";
 import { z } from "zod";
 
 import { publicProcedure, createTRPCRouter } from "../trpc";

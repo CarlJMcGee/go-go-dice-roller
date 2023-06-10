@@ -1,67 +1,36 @@
 import { MapPlus } from "@carljmcgee/set-map-plus";
-import type { Die } from "../../utils/go-dice-api";
+import type { FakeDie, FakeDieColors } from "../../types/Dice";
+import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 import type { genDieFaces, genDieTypes } from "../../types/genesysDice";
+import { numBetween } from "@carljmcgee/lol-random";
 import {
-  useBatteryLevel,
-  useConnectionStatus,
-  useDieColor,
-  useRolling,
-} from "../../utils/go-dice-react";
-import type { DieTypes } from "../../utils/go-dice-api/src/die";
-import { useGenesysDie } from "../../utils/go-dice-genesys-hooks";
+  abilityDie,
+  boostDie,
+  proficiencyDie,
+  setbackDie,
+} from "../../utils/go-dice-genesys-hooks";
 import { CloseButton, Group } from "@mantine/core";
 
-export interface IDieDisplayProps {
-  die: Die;
-  index: number;
+interface GenesysFakeDieDisplayProps {
+  die: FakeDie;
+  removeDie: (die: FakeDie) => void;
   inputResult: (values: genDieFaces[]) => void;
-  setRolled: React.Dispatch<React.SetStateAction<boolean>>;
-  removeDie: (dieId: string) => void;
+  setGenRolled: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function GenesysDieDisplay({
+export default function GenesysFakeDieDisplay({
   die,
-  index: i,
-  inputResult,
-  setRolled,
   removeDie,
-}: IDieDisplayProps) {
-  const [label, setLabel] = useState(`Die #${i + 1}`);
+  inputResult,
+  setGenRolled,
+}: GenesysFakeDieDisplayProps) {
+  const [label, setLabel] = useState(`New Die`);
   const [editing, setEditing] = useState(false);
   const [dieType, setDieType] = useState<genDieTypes>("boost");
-
-  const connected = useConnectionStatus(die);
-  const dieColor = useDieColor(die);
-  const batteryLvl = useBatteryLevel(die);
-  const rolling = useRolling(die);
-  const value = useGenesysDie(die, dieType);
-
-  useEffect(() => {
-    const genToDFace: Record<genDieTypes, DieTypes> = {
-      ability: "D8",
-      proficiency: "D12",
-      boost: "D6",
-      difficulty: "D8",
-      challenge: "D12",
-      setback: "D6",
-    };
-    die.setDieType(genToDFace[dieType]);
-  }, [dieType, die]);
-
-  useEffect(() => {
-    if (!value || value[0] === "blank") {
-      return;
-    }
-    setRolled(true);
-    inputResult(value);
-  }, [value]);
-
-  useEffect(() => {
-    if (!connected) {
-      removeDie(die.id);
-    }
-  }, [connected]);
+  const [dieColor, setColor] = useState<FakeDieColors>("white");
+  const [rolling, setRolling] = useState(false);
+  const [value, setValue] = useState<genDieFaces[]>();
 
   const borderColorMap = MapPlus<string, string>([
     ["boost", "border-sky-600"],
@@ -80,6 +49,56 @@ export default function GenesysDieDisplay({
     ["setback", "bg-gray-700"],
   ]);
 
+  function getDieSides(dieType: genDieTypes): number {
+    switch (dieType) {
+      case "boost":
+        return 6;
+      case "ability":
+        return 8;
+      case "proficiency":
+        return 12;
+      case "setback":
+        return 6;
+      case "difficulty":
+        return 8;
+      case "challenge":
+        return 12;
+    }
+  }
+
+  function getGenValue(dieType: genDieTypes): genDieFaces[] {
+    const sideUp = numBetween(1, getDieSides(dieType));
+    switch (dieType) {
+      case "boost":
+        return boostDie.get(sideUp) as genDieFaces[];
+      case "ability":
+        return abilityDie.get(sideUp) as genDieFaces[];
+      case "proficiency":
+        return proficiencyDie.get(sideUp) as genDieFaces[];
+      case "setback":
+        return setbackDie.get(sideUp) as genDieFaces[];
+      case "difficulty":
+        return setbackDie.get(sideUp) as genDieFaces[];
+      case "challenge":
+        return setbackDie.get(sideUp) as genDieFaces[];
+    }
+  }
+
+  async function rollDie() {
+    setRolling(true);
+    await new Promise((res) => setTimeout(res, 1000));
+    setValue(getGenValue(dieType));
+    setRolling(false);
+  }
+
+  useEffect(() => {
+    if (!value) {
+      return;
+    }
+    inputResult(value);
+    setGenRolled(true);
+  }, [value]);
+
   return (
     <div
       className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${
@@ -91,7 +110,7 @@ export default function GenesysDieDisplay({
         <CloseButton
           color="red"
           onClick={() => {
-            removeDie(die.id);
+            removeDie(die);
           }}
         />
       </Group>
@@ -129,19 +148,15 @@ export default function GenesysDieDisplay({
           <option value="difficulty">difficulty - D8</option>
           <option value="challenge">challenge - D12</option>
         </select>
-        <h3>
-          Battery currently at{" "}
-          <span
-            className={`font-semibold ${
-              batteryLvl && batteryLvl > 10
-                ? "text-black"
-                : "animate-pulse text-red-500"
-            }`}
-          >
-            {batteryLvl}%
-          </span>
-        </h3>
       </div>
+      <button
+        className={`m-2 w-1/2 self-center rounded-md bg-[#00b4ff] ${
+          borderColorMap.get(dieType) ?? ""
+        }`}
+        onClick={() => rollDie()}
+      >
+        Roll
+      </button>
       <div className="flex h-full items-center justify-center text-center">
         {rolling ? <h3 className="text-4xl">Rolling...</h3> : null}
         {!rolling && value && value[0] !== "blank" ? (

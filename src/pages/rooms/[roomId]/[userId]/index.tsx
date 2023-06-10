@@ -1,6 +1,5 @@
 import type { ParsedUrlQuery } from "querystring";
 import type { DiceStyles, DieRollFull, FakeDie } from "../../../../types/Dice";
-import type { Members } from "pusher-js";
 import type { Member } from "../../../../types/pusher";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -8,18 +7,16 @@ import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
-import GenesysDieDisplay from "../../../../components/GenesysDieDisplay";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import PusherClient from "pusher-js";
 import Link from "next/link";
-import StandardDieDisplay from "../../../../components/StandardDieDisplay";
 import { ActionIcon, Menu, Select } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import RollsRTCDisplay from "../../../../components/RollsRTCDisplay";
 import Dice from "../../../../components/Dice";
 import FakeDice from "../../../../components/FakeDice";
-import { randomUUID } from "crypto";
 import { numBetween } from "@carljmcgee/lol-random";
+import GenesysResultDisplay from "../../../../components/GenesysResultDisplay";
 
 const RoomSession = () => {
   // router
@@ -37,7 +34,6 @@ const RoomSession = () => {
   const [diceMenu, setDiceMenu] = useState(false);
 
   // trpc calls
-  const utils = trpc.useContext();
   const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery(
     {
       roomId: roomId,
@@ -130,10 +126,6 @@ const RoomSession = () => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(diceMenu);
-  }, [diceMenu]);
-
   if (roomLoading || userLoading) {
     return (
       <div>
@@ -206,7 +198,12 @@ const RoomSession = () => {
             />
           </div>
           {/* die outcome display */}
-          <div className="flex justify-center text-center text-4xl text-white">
+          <GenesysResultDisplay
+            genesys={genesys}
+            roomId={roomId}
+            userId={userId}
+          />
+          {/* <div className="flex justify-center text-center text-4xl text-white">
             {genesys.rolled && (
               <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${
                 genesys.sideEffects && `with ${genesys.sideEffects}`
@@ -220,7 +217,7 @@ const RoomSession = () => {
                 Reset
               </button>
             )}
-          </div>
+          </div> */}
           {/* dice */}
           <div className="grid grid-cols-1 items-start md:grid-cols-2">
             {/* real dice */}
@@ -243,6 +240,8 @@ const RoomSession = () => {
                 key={die.id}
                 die={die}
                 index={i}
+                inputResult={genesys.inputResult}
+                setRolled={genesys.setRolled}
                 diceStyle={diceStyle}
                 removeDie={removeFakeDie}
                 sess={[roomId, userId]}
