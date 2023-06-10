@@ -37,18 +37,17 @@ export default function GenesysDieDisplay({
   const rolling = useRolling(die);
   const value = useGenesysDie(die, dieType);
 
-  const genToDFace: Record<genDieTypes, DieTypes> = {
-    ability: "D8",
-    proficiency: "D12",
-    boost: "D6",
-    difficulty: "D8",
-    challenge: "D12",
-    setback: "D6",
-  };
-
   useEffect(() => {
+    const genToDFace: Record<genDieTypes, DieTypes> = {
+      ability: "D8",
+      proficiency: "D12",
+      boost: "D6",
+      difficulty: "D8",
+      challenge: "D12",
+      setback: "D6",
+    };
     die.setDieType(genToDFace[dieType]);
-  }, [dieType, die, genToDFace]);
+  }, [dieType, die]);
 
   useEffect(() => {
     if (!value || value[0] === "blank") {

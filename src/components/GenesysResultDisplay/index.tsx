@@ -1,5 +1,5 @@
 import { trpc } from "../../utils/api";
-import { useGenesysResult } from "../../utils/go-dice-genesys-hooks";
+import type { useGenesysResult } from "../../utils/go-dice-genesys-hooks";
 
 interface GenesysResultDisplayProps {
   genesys: ReturnType<typeof useGenesysResult>;

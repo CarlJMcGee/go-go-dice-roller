@@ -1,4 +1,4 @@
-import { DieRoll } from "@prisma/client";
+import type { DieRoll } from "@prisma/client";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { triggerEvent } from "../../../utils/pusher-store";

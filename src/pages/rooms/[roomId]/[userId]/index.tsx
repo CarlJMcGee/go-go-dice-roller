@@ -7,7 +7,7 @@ import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import PusherClient from "pusher-js";
 import Link from "next/link";
 import { ActionIcon, Menu, Select } from "@mantine/core";

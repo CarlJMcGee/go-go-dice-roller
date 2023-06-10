@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction } from "react";
-import { DiceStyles, FakeDie } from "../../types/Dice";
-import { genDieFaces } from "../../types/genesysDice";
+import type { Dispatch, SetStateAction } from "react";
+import type { DiceStyles, FakeDie } from "../../types/Dice";
+import type { genDieFaces } from "../../types/genesysDice";
 import GenesysFakeDieDisplay from "../GenesysFakeDieDisplay";
 import StandardFakeDieDisplay from "../StandardFakeDieDisplay";
 
@@ -26,18 +26,10 @@ export default function FakeDice({
   setRolled,
 }: FakeDiceProps) {
   return diceStyle === "standard" ? (
-    <StandardFakeDieDisplay
-      die={die}
-      index={index}
-      key={key}
-      removeDie={removeDie}
-      sess={sess}
-    />
+    <StandardFakeDieDisplay die={die} removeDie={removeDie} sess={sess} />
   ) : diceStyle === "genesys" ? (
     <GenesysFakeDieDisplay
       die={die}
-      index={index}
-      key={key}
       removeDie={removeDie}
       inputResult={inputResult}
       setGenRolled={setRolled}

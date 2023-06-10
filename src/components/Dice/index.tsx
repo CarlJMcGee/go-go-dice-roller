@@ -1,6 +1,6 @@
-import { DiceStyles } from "../../types/Dice";
-import { genDieFaces } from "../../types/genesysDice";
-import { Die } from "../../utils/go-dice-api";
+import type { DiceStyles } from "../../types/Dice";
+import type { genDieFaces } from "../../types/genesysDice";
+import type { Die } from "../../utils/go-dice-api";
 import GenesysDieDisplay from "../GenesysDieDisplay";
 import StandardDieDisplay from "../StandardDieDisplay";
 

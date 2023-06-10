@@ -1,7 +1,8 @@
 import { MapPlus } from "@carljmcgee/set-map-plus";
-import { FakeDie, FakeDieColors } from "../../types/Dice";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { genDieFaces, genDieTypes } from "../../types/genesysDice";
+import type { FakeDie, FakeDieColors } from "../../types/Dice";
+import type { Dispatch, SetStateAction } from "react";
+import { useEffect, useState } from "react";
+import type { genDieFaces, genDieTypes } from "../../types/genesysDice";
 import { numBetween } from "@carljmcgee/lol-random";
 import {
   abilityDie,
@@ -13,8 +14,6 @@ import { CloseButton, Group } from "@mantine/core";
 
 interface GenesysFakeDieDisplayProps {
   die: FakeDie;
-  index: number;
-  key: string;
   removeDie: (die: FakeDie) => void;
   inputResult: (values: genDieFaces[]) => void;
   setGenRolled: Dispatch<SetStateAction<boolean>>;
@@ -22,8 +21,6 @@ interface GenesysFakeDieDisplayProps {
 
 export default function GenesysFakeDieDisplay({
   die,
-  index: i,
-  key,
   removeDie,
   inputResult,
   setGenRolled,
@@ -153,9 +150,9 @@ export default function GenesysFakeDieDisplay({
         </select>
       </div>
       <button
-        className={`m-2 w-1/2 self-center rounded-md bg-[#00b4ff] ${borderColorMap.get(
-          dieType
-        )}`}
+        className={`m-2 w-1/2 self-center rounded-md bg-[#00b4ff] ${
+          borderColorMap.get(dieType) ?? ""
+        }`}
         onClick={() => rollDie()}
       >
         Roll
