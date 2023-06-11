@@ -36,7 +36,11 @@ export default function LoginBox() {
   const addRoomHandler = (e: React.FormEvent) => {
     e.preventDefault();
 
-    addRoom({ name: roomName });
+    if (roomName.trim() === "") {
+      return;
+    }
+
+    addRoom({ name: roomName.trim() });
   };
   const addCharHandler = (e: React.FormEvent) => {
     e.preventDefault();
