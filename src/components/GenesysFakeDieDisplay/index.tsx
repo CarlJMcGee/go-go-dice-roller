@@ -99,7 +99,7 @@ export default function GenesysFakeDieDisplay({
 
   useEffect(() => {
     if (rollAllFlag) {
-      rollDie();
+      void rollDie();
     }
   }, [rollAllFlag]);
 

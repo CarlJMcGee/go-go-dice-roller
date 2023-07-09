@@ -70,7 +70,7 @@ export default function StandardFakeDieDisplay({
 
   useEffect(() => {
     if (rollAllFlag) {
-      rollDie();
+      void rollDie();
     }
   }, [rollAllFlag]);
 
