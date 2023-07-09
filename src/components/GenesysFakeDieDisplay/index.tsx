@@ -11,6 +11,10 @@ import {
   setbackDie,
 } from "../../utils/go-dice-genesys-hooks";
 import { CloseButton, Group } from "@mantine/core";
+import { RollAllAtom } from "../../utils/stateStore";
+import { useAtom } from "jotai";
+import Image from "next/image";
+import rollingGif from "../../media/dice-roll.gif";
 
 interface GenesysFakeDieDisplayProps {
   die: FakeDie;
@@ -31,6 +35,8 @@ export default function GenesysFakeDieDisplay({
   const [dieColor, setColor] = useState<FakeDieColors>("white");
   const [rolling, setRolling] = useState(false);
   const [value, setValue] = useState<genDieFaces[]>();
+
+  const [rollAllFlag, _] = useAtom(RollAllAtom);
 
   const borderColorMap = MapPlus<string, string>([
     ["boost", "border-sky-600"],
@@ -90,6 +96,12 @@ export default function GenesysFakeDieDisplay({
     setValue(getGenValue(dieType));
     setRolling(false);
   }
+
+  useEffect(() => {
+    if (rollAllFlag) {
+      rollDie();
+    }
+  }, [rollAllFlag]);
 
   useEffect(() => {
     if (!value) {
@@ -158,8 +170,10 @@ export default function GenesysFakeDieDisplay({
         Roll
       </button>
       <div className="flex h-full items-center justify-center text-center">
-        {rolling ? <h3 className="text-4xl">Rolling...</h3> : null}
-        {!rolling && value && value[0] !== "blank" ? (
+        {rolling ? (
+          <Image src={rollingGif} alt="rolling" width={50} height={50} />
+        ) : null}
+        {!rolling && value ? (
           <h3 className="text-2xl text-white">{value.join(" + ")}</h3>
         ) : null}
       </div>

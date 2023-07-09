@@ -6,6 +6,8 @@ import { numBetween } from "@carljmcgee/lol-random";
 import { trpc } from "../../utils/api";
 import rollingGif from "../../media/dice-roll.gif";
 import Image from "next/image";
+import { RollAllAtom } from "../../utils/stateStore";
+import { useAtom } from "jotai";
 
 interface StandardFakeDieDisplayProps {
   die: FakeDie;
@@ -25,6 +27,8 @@ export default function StandardFakeDieDisplay({
   const [dieType, setDieType] = useState<DieTypes>("D6");
   const [rolling, setRolling] = useState(false);
   const [value, setValue] = useState<string>();
+
+  const [rollAllFlag, _] = useAtom(RollAllAtom);
 
   // trpc
   const { mutate: sendRoll } = trpc.dieRoll.add.useMutation();
@@ -63,6 +67,12 @@ export default function StandardFakeDieDisplay({
     setValue(numBetween(1, dieSides[dieType]).toString());
     setRolling(false);
   }
+
+  useEffect(() => {
+    if (rollAllFlag) {
+      rollDie();
+    }
+  }, [rollAllFlag]);
 
   useEffect(() => {
     if (!value) {

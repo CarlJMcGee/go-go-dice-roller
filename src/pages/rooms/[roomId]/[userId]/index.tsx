@@ -17,6 +17,8 @@ import Dice from "../../../../components/Dice";
 import FakeDice from "../../../../components/FakeDice";
 import { numBetween } from "@carljmcgee/lol-random";
 import GenesysResultDisplay from "../../../../components/GenesysResultDisplay";
+import { useAtom } from "jotai";
+import { RollAllAtom } from "../../../../utils/stateStore";
 
 const RoomSession = () => {
   // router
@@ -32,6 +34,7 @@ const RoomSession = () => {
   const [membersList, updateMembers] = useState<User[]>([]);
   const [partyRolls, setPartyRolls] = useState<DieRollFull[]>([]);
   const [diceMenu, setDiceMenu] = useState(false);
+  const [rollAllState, rollAll] = useAtom(RollAllAtom);
 
   // trpc calls
   const { data: room, isLoading: roomLoading } = trpc.room.getOne.useQuery(
@@ -66,6 +69,24 @@ const RoomSession = () => {
   const [fakeDice, setFakeDice] = useState<FakeDie[]>([]);
   function removeFakeDie(die: FakeDie) {
     setFakeDice((fakeDice) => fakeDice.filter((d) => d !== die));
+  }
+
+  // handlers
+  function rollAllHandler() {
+    rollAll(true);
+    setTimeout(() => {
+      rollAll(false);
+    }, 1500);
+  }
+  function removeAllHandler() {
+    dice.forEach((die) => {
+      removeDie(die.id);
+      die.disconnect();
+    });
+
+    fakeDice.forEach((die) => {
+      removeFakeDie(die);
+    });
   }
 
   // pusher
@@ -203,22 +224,22 @@ const RoomSession = () => {
             roomId={roomId}
             userId={userId}
           />
-          {/* <div className="flex justify-center text-center text-4xl text-white">
-            {genesys.rolled && (
-              <h3>{`${genesys.crit && genesys.crit} ${genesys.outcome} ${
-                genesys.sideEffects && `with ${genesys.sideEffects}`
-              }`}</h3>
-            )}
-            {genesys.rolled && (
-              <button
-                className="rounded-md bg-gray-400 px-2 py-1 hover:bg-gray-600"
-                onClick={() => genesys.resetResults()}
-              >
-                Reset
-              </button>
-            )}
-          </div> */}
           {/* dice */}
+          <div className="flex justify-between p-2">
+            <button
+              className="m-1 rounded-md bg-[#436a72] px-4 py-1 text-xl text-white hover:bg-[#638d87]"
+              onClick={() => rollAllHandler()}
+              disabled={rollAllState}
+            >
+              Roll All
+            </button>
+            <button
+              className="m-1 rounded-md bg-red-500 px-4 py-1 text-xl text-white hover:bg-red-400"
+              onClick={() => removeAllHandler()}
+            >
+              Remove All
+            </button>
+          </div>
           <div className="grid grid-cols-1 items-start md:grid-cols-2">
             {/* real dice */}
             {dice.map((die, i) => (
