@@ -42,6 +42,7 @@ export default function Dice({
       inputResult={inputResult}
       setRolled={setRolled}
       removeDie={removeDie}
+      sess={[roomId, userId]}
     />
   ) : null;
 }

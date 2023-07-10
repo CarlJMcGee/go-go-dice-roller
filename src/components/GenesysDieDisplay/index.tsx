@@ -11,6 +11,9 @@ import {
 import type { DieTypes } from "../../utils/go-dice-api/src/die";
 import { useGenesysDie } from "../../utils/go-dice-genesys-hooks";
 import { CloseButton, Group } from "@mantine/core";
+import Image from "next/image";
+import { trpc } from "../../utils/api";
+import rollingGif from "../../media/dice-roll.gif";
 
 export interface IDieDisplayProps {
   die: Die;
@@ -18,6 +21,7 @@ export interface IDieDisplayProps {
   inputResult: (values: genDieFaces[]) => void;
   setRolled: React.Dispatch<React.SetStateAction<boolean>>;
   removeDie: (dieId: string) => void;
+  sess: [roomId: string, userId: string];
 }
 
 export default function GenesysDieDisplay({
@@ -26,6 +30,7 @@ export default function GenesysDieDisplay({
   inputResult,
   setRolled,
   removeDie,
+  sess,
 }: IDieDisplayProps) {
   const [label, setLabel] = useState(`Die #${i + 1}`);
   const [editing, setEditing] = useState(false);
@@ -36,6 +41,8 @@ export default function GenesysDieDisplay({
   const batteryLvl = useBatteryLevel(die);
   const rolling = useRolling(die);
   const value = useGenesysDie(die, dieType);
+
+  const { mutate: sendRoll } = trpc.dieRoll.add.useMutation();
 
   useEffect(() => {
     const genToDFace: Record<genDieTypes, DieTypes> = {
@@ -55,6 +62,12 @@ export default function GenesysDieDisplay({
     }
     setRolled(true);
     inputResult(value);
+
+    sendRoll({
+      outcome: value.join(" + "),
+      roomId: sess[0],
+      userId: sess[1],
+    });
   }, [value]);
 
   useEffect(() => {
@@ -143,8 +156,10 @@ export default function GenesysDieDisplay({
         </h3>
       </div>
       <div className="flex h-full items-center justify-center text-center">
-        {rolling ? <h3 className="text-4xl">Rolling...</h3> : null}
-        {!rolling && value && value[0] !== "blank" ? (
+        {rolling ? (
+          <Image src={rollingGif} alt="rolling" width={50} height={50} />
+        ) : null}
+        {!rolling && value ? (
           <h3 className="text-2xl text-white">{value.join(" + ")}</h3>
         ) : null}
       </div>

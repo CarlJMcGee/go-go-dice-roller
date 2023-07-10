@@ -15,12 +15,14 @@ import { RollAllAtom } from "../../utils/stateStore";
 import { useAtom } from "jotai";
 import Image from "next/image";
 import rollingGif from "../../media/dice-roll.gif";
+import { trpc } from "../../utils/api";
 
 interface GenesysFakeDieDisplayProps {
   die: FakeDie;
   removeDie: (die: FakeDie) => void;
   inputResult: (values: genDieFaces[]) => void;
   setGenRolled: Dispatch<SetStateAction<boolean>>;
+  sess: [roomId: string, userId: string];
 }
 
 export default function GenesysFakeDieDisplay({
@@ -28,6 +30,7 @@ export default function GenesysFakeDieDisplay({
   removeDie,
   inputResult,
   setGenRolled,
+  sess,
 }: GenesysFakeDieDisplayProps) {
   const [label, setLabel] = useState(`New Die`);
   const [editing, setEditing] = useState(false);
@@ -37,6 +40,8 @@ export default function GenesysFakeDieDisplay({
   const [value, setValue] = useState<genDieFaces[]>();
 
   const [rollAllFlag, _] = useAtom(RollAllAtom);
+
+  const { mutate: sendRoll } = trpc.dieRoll.add.useMutation();
 
   const borderColorMap = MapPlus<string, string>([
     ["boost", "border-sky-600"],
@@ -109,6 +114,12 @@ export default function GenesysFakeDieDisplay({
     }
     inputResult(value);
     setGenRolled(true);
+
+    sendRoll({
+      outcome: value.join(" + "),
+      roomId: sess[0],
+      userId: sess[1],
+    });
   }, [value]);
 
   return (

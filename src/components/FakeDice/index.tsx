@@ -33,6 +33,7 @@ export default function FakeDice({
       removeDie={removeDie}
       inputResult={inputResult}
       setGenRolled={setRolled}
+      sess={sess}
     />
   ) : null;
 }
