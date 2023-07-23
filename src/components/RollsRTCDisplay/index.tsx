@@ -28,7 +28,7 @@ const DiceRoll: React.FC<DiceRollProps> = ({ rolls: rollsRaw }) => {
     setRolls(
       rollsRaw.filter((roll) => roll.user.playerName === selectedPlayer)
     );
-  }, [selectedPlayer]);
+  }, [selectedPlayer, rollsRaw]);
 
   return (
     <div className="my-3 mr-3 rounded-md bg-[#627899] bg-opacity-75 text-center text-white md:w-1/2">
