@@ -19,6 +19,7 @@ import { numBetween } from "@carljmcgee/lol-random";
 import GenesysResultDisplay from "../../../../components/GenesysResultDisplay";
 import { useAtom } from "jotai";
 import { RollAllAtom } from "../../../../utils/stateStore";
+import { useLocalStorage } from "@mantine/hooks";
 
 const RoomSession = () => {
   // router
@@ -30,7 +31,10 @@ const RoomSession = () => {
   const { roomId, userId } = router.query as RoomSessParams;
 
   // state
-  const [diceStyle, setDiceStyle] = useState<DiceStyles>("standard");
+  const [diceStyle, saveDiceStyle] = useLocalStorage<DiceStyles>({
+    key: "diceStyle",
+    defaultValue: "standard",
+  });
   const [membersList, updateMembers] = useState<User[]>([]);
   const [partyRolls, setPartyRolls] = useState<DieRollFull[]>([]);
   const [diceMenu, setDiceMenu] = useState(false);
@@ -213,9 +217,9 @@ const RoomSession = () => {
                 { value: "standard", label: "Standard" },
                 { value: "genesys", label: "Genesys" },
               ]}
-              onChange={(value) =>
-                setDiceStyle((value as DiceStyles) ?? "standard")
-              }
+              onChange={(value) => {
+                saveDiceStyle((value as DiceStyles) ?? "standard");
+              }}
             />
           </div>
           {/* die outcome display */}
