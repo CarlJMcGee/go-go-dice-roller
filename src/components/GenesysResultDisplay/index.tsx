@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { trpc } from "../../utils/api";
 import type { useGenesysResult } from "../../utils/go-dice-genesys-hooks";
 
@@ -13,13 +14,23 @@ export default function GenesysResultDisplay({
   userId,
 }: GenesysResultDisplayProps) {
   const { mutate: sendRoom } = trpc.dieRoll.add.useMutation();
+  const [timerFlag, setTimerFlag] = useState(false);
+
+  useEffect(() => {
+    if (!timerFlag) return;
+
+    setTimeout(() => {
+      genesys.resetResults();
+      setTimerFlag(false);
+    }, 30 * 1000);
+  }, [timerFlag]);
 
   return (
     <div className="flex items-center justify-center text-center text-4xl text-white">
       {genesys.rolled && (
         <button
           className="mx-2 rounded-md bg-green-400 px-3 py-3 text-base hover:bg-green-600"
-          onClick={() =>
+          onClick={() => {
             sendRoom({
               outcome: [
                 genesys.crit,
@@ -28,8 +39,10 @@ export default function GenesysResultDisplay({
               ].join(" "),
               roomId: roomId,
               userId: userId,
-            })
-          }
+            });
+
+            setTimerFlag(true);
+          }}
         >
           Send
         </button>
