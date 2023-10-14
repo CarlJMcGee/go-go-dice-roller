@@ -57,7 +57,7 @@ export default function GenesysDieDisplay({
   }, [dieType, die]);
 
   useEffect(() => {
-    if (!value || value[0] === "blank") {
+    if (!value) {
       return;
     }
     setRolled(true);

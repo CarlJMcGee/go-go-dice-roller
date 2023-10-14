@@ -7,6 +7,8 @@ import { numBetween } from "@carljmcgee/lol-random";
 import {
   abilityDie,
   boostDie,
+  challengeDie,
+  difficultyDie,
   proficiencyDie,
   setbackDie,
 } from "../../utils/go-dice-genesys-hooks";
@@ -89,9 +91,9 @@ export default function GenesysFakeDieDisplay({
       case "setback":
         return setbackDie.get(sideUp) as genDieFaces[];
       case "difficulty":
-        return setbackDie.get(sideUp) as genDieFaces[];
+        return difficultyDie.get(sideUp) as genDieFaces[];
       case "challenge":
-        return setbackDie.get(sideUp) as genDieFaces[];
+        return challengeDie.get(sideUp) as genDieFaces[];
     }
   }
 
@@ -112,6 +114,7 @@ export default function GenesysFakeDieDisplay({
     if (!value) {
       return;
     }
+
     inputResult(value);
     setGenRolled(true);
 
@@ -127,7 +130,9 @@ export default function GenesysFakeDieDisplay({
       className={`m-1 flex h-52 w-52 flex-col justify-self-center border-4 p-3 ${
         borderColorMap.get(dieType) ?? ""
       } 
-        ${bgColorMap.get(dieType) ?? ""}`}
+        ${bgColorMap.get(dieType) ?? ""} ${
+        dieType === "setback" ? "text-white" : ""
+      }`}
     >
       <Group position="right">
         <CloseButton
