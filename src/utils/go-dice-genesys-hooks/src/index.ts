@@ -129,12 +129,12 @@ function setbackDieValue(value: string): genDieFaces[] {
   return roll;
 }
 const GenValueMap = MapPlus<genDieTypes, (value: string) => genDieFaces[]>([
-  ["proficiency", proficiencyDieValue],
-  ["ability", abilityDieValue],
   ["boost", boostDieValue],
-  ["challenge", challengeDieValue],
-  ["difficulty", difficultyDieValue],
+  ["ability", abilityDieValue],
+  ["proficiency", proficiencyDieValue],
   ["setback", setbackDieValue],
+  ["difficulty", difficultyDieValue],
+  ["challenge", challengeDieValue],
 ]);
 
 export function useGenesysDie(die: Die, dieType: genDieTypes) {
