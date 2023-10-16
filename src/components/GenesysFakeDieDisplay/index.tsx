@@ -18,6 +18,7 @@ import { useAtom } from "jotai";
 import Image from "next/image";
 import rollingGif from "../../media/dice-roll.gif";
 import { trpc } from "../../utils/api";
+import { getDieSymbol } from "../../utils/go-dice-genesys-hooks/src";
 
 interface GenesysFakeDieDisplayProps {
   die: FakeDie;
@@ -40,6 +41,7 @@ export default function GenesysFakeDieDisplay({
   const [dieColor, setColor] = useState<FakeDieColors>("white");
   const [rolling, setRolling] = useState(false);
   const [value, setValue] = useState<genDieFaces[]>();
+  const [symbol, setSymbol] = useState<string | undefined>(undefined);
 
   const [rollAllFlag, _] = useAtom(RollAllAtom);
 
@@ -118,6 +120,8 @@ export default function GenesysFakeDieDisplay({
     inputResult(value);
     setGenRolled(true);
 
+    setSymbol(getDieSymbol(value));
+
     sendRoll({
       outcome: value.join(" + "),
       roomId: sess[0],
@@ -134,15 +138,7 @@ export default function GenesysFakeDieDisplay({
         dieType === "setback" ? "text-white" : ""
       }`}
     >
-      <Group position="right">
-        <CloseButton
-          color="red"
-          onClick={() => {
-            removeDie(die);
-          }}
-        />
-      </Group>
-      <div className="text-center">
+      <Group position="apart">
         {editing ? (
           <input
             type={"text"}
@@ -156,11 +152,21 @@ export default function GenesysFakeDieDisplay({
             onBlur={() => {
               setEditing(false);
             }}
-            className={`w-5/6 bg-transparent`}
+            className={`w-3/4 bg-transparent`}
           />
         ) : (
-          <h2 onClick={() => setEditing(true)}>{label}</h2>
+          <h2 onClick={() => setEditing(true)} className="text-center">
+            {label}
+          </h2>
         )}
+        <CloseButton
+          color="red"
+          onClick={() => {
+            removeDie(die);
+          }}
+        />
+      </Group>
+      <div className="text-center">
         <select
           name="dieType"
           id="dieType"
@@ -190,7 +196,16 @@ export default function GenesysFakeDieDisplay({
           <Image src={rollingGif} alt="rolling" width={50} height={50} />
         ) : null}
         {!rolling && value ? (
-          <h3 className="text-2xl text-white">{value.join(" + ")}</h3>
+          symbol !== "blank" ? (
+            <Image
+              src={symbol ?? ""}
+              alt={value?.join(" ") ?? ""}
+              width={90}
+              height={90}
+            />
+          ) : (
+            <h3 className="text-4xl font-bold">[ Blank ]</h3>
+          )
         ) : null}
       </div>
     </div>

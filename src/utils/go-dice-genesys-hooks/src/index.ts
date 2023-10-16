@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
 import { Die } from "../../go-dice-api/index.js";
 import { MapPlus } from "@carljmcgee/set-map-plus";
+import succ from "./assets/success.webp";
+import sucSuc from "./assets/success_success.webp";
+import sucAdv from "./assets/success_advantage.webp";
+import adv from "./assets/advantage.webp";
+import advAdv from "./assets/advantage_advantage.webp";
+import tri from "./assets/triumph.webp";
+import fail from "./assets/failure.webp";
+import failFail from "./assets/failure_failure.webp";
+import failThreat from "./assets/failure_threat.webp";
+import threat from "./assets/threat.webp";
+import threatThreat from "./assets/threat_threat.webp";
+import despair from "./assets/despair.webp";
 
 export type posDieFaces = "success" | "advantage" | "triumph" | "blank";
 export type negDieFaces = "failure" | "threat" | "despair" | "blank";
@@ -235,4 +247,42 @@ export function useGenesysResult(): {
     inputResult: inputResult,
     resetResults: resetResults,
   };
+}
+
+export function getDieSymbol(results: genDieFaces[]): string {
+  if (results.length === 0) return "blank";
+
+  switch (results.sort().join(" ")) {
+    case "success":
+      return succ.src;
+    case "success success":
+      return sucSuc.src;
+
+    case "advantage success":
+      return sucAdv.src;
+    case "advantage":
+      return adv.src;
+    case "advantage advantage":
+      return advAdv.src;
+
+    case "triumph":
+      return tri.src;
+
+    case "failure":
+      return fail.src;
+    case "failure failure":
+      return failFail.src;
+    case "failure threat":
+      return failThreat.src;
+
+    case "threat":
+      return threat.src;
+    case "threat threat":
+      return threatThreat.src;
+
+    case "despair":
+      return despair.src;
+    default:
+      return "blank";
+  }
 }
