@@ -41,7 +41,6 @@ export const dieRollRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // check if input.outcome string contains "success" and replace with "S"
       if (input.outcome.includes("Success")) {
         input.outcome = input.outcome.replace("Success", "Succ");
       }
@@ -57,8 +56,8 @@ export const dieRollRouter = createTRPCRouter({
       if (input.outcome.includes("Triumphant")) {
         input.outcome = input.outcome.replace("Triumphant", "Trph");
       }
-      if (input.outcome.includes("Despair")) {
-        input.outcome = input.outcome.replace("Despair", "Des");
+      if (input.outcome.includes("Despairing")) {
+        input.outcome = input.outcome.replace("Despairing", "Despr");
       }
 
       const newRoll: DieRoll = await ctx.prisma.dieRoll.create({
