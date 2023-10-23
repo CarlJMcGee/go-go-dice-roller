@@ -15,6 +15,8 @@ const RollDisplay: React.FC<RollDisplayProps> = ({ roll }) => {
   const [symbol, setSymbol] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    if (Number.parseInt(roll.outcome)) return;
+
     if (/Succ|Adv|Dis|Fail|Despr|Trph/g.test(roll.outcome)) {
       setSymbol(undefined);
       return;
