@@ -36,16 +36,25 @@ const RollDisplay: React.FC<RollDisplayProps> = ({ roll }) => {
       } bg-opacity-75`}
     >
       <h3 className="mt-3 ml-3 text-2xl">{roll.user.playerName}</h3>
-      <div className="mb-4 flex items-center justify-center">
+      <div className="mb-4 flex items-center justify-center gap-1">
         <p className="mr-3 text-center text-xl">
           {roll.user.charName} Rolled a
           {!symbol && (
             <span className="text-3xl font-bold"> {roll.outcome}</span>
           )}
         </p>
-        {symbol && symbol !== "blank" && (
-          <Image src={symbol ?? ""} alt={roll.outcome} width={80} height={80} />
-        )}
+        {symbol &&
+          (symbol !== "blank" ? (
+            <Image
+              src={symbol ?? ""}
+              alt={roll.outcome}
+              width={80}
+              height={80}
+            />
+          ) : (
+            <span className="text-3xl font-bold">[Blank]</span>
+          ))}
+        <p> </p>
         <p className="text-sm">{moment(roll.created).fromNow()}</p>
       </div>
     </li>

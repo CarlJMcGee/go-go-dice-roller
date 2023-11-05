@@ -174,15 +174,15 @@ const RoomSession = () => {
         <div className="m-2 flex flex-col justify-center">
           <Head>
             <title>
-              {room?.name}: {player?.charName}
+              {room?.name}: {player.charName}
             </title>
           </Head>
           <h1 className="text-center text-4xl text-[#2f4858]">{room?.name}</h1>
           <h2 className="text-center text-2xl text-[#2f4858]">
-            Character Name: {player?.charName}
+            Character Name: {player.charName}
           </h2>
           <h2 className="text-center text-2xl text-[#2f4858]">
-            Player Name: {player?.playerName}
+            Player Name: {player.playerName}
           </h2>
         </div>
         {/* player list */}
