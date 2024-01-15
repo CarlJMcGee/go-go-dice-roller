@@ -4,41 +4,41 @@ import { TRPCError } from "@trpc/server";
 import Link from "next/link";
 
 const DbConfig = () => {
-  const [password, setPassword] = React.useState("");
+  // const [password, setPassword] = React.useState("");
 
-  const { mutateAsync: fetchDbData, data: DBdata } =
-    trpc.db.export.useMutation();
-  const {
-    mutateAsync: importDbData,
-    data,
-    isLoading: isUploading,
-  } = trpc.db.import.useMutation();
-  const [file, setFile] = React.useState<string | null>(null);
-  const [newData, setNewData] =
-    React.useState<Exclude<typeof DBdata, TRPCError>>(undefined);
+  // const { mutateAsync: fetchDbData, data: DBdata } =
+  //   trpc.db.export.useMutation();
+  // const {
+  //   mutateAsync: importDbData,
+  //   data,
+  //   isLoading: isUploading,
+  // } = trpc.db.import.useMutation();
+  // const [file, setFile] = React.useState<string | null>(null);
+  // const [newData, setNewData] =
+  //   React.useState<Exclude<typeof DBdata, TRPCError>>(undefined);
 
-  const createFile = async () => {
-    try {
-      const res = await fetchDbData({ password: password });
+  // const createFile = async () => {
+  //   try {
+  //     const res = await fetchDbData({ password: password });
 
-      if (!res) {
-        return;
-      }
-      const blob = new Blob([JSON.stringify(res)], { type: "text/json" });
-      const url = URL.createObjectURL(blob);
-      setFile(url);
-    } catch (err) {
-      if (err) console.error(err);
-    }
-  };
+  //     if (!res) {
+  //       return;
+  //     }
+  //     const blob = new Blob([JSON.stringify(res)], { type: "text/json" });
+  //     const url = URL.createObjectURL(blob);
+  //     setFile(url);
+  //   } catch (err) {
+  //     if (err) console.error(err);
+  //   }
+  // };
 
-  const fileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const data = await file.text();
-    const json = JSON.parse(data);
-    setNewData(json);
-  };
+  // const fileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+  //   const data = await file.text();
+  //   const json = JSON.parse(data) as typeof DBdata;
+  //   setNewData(json);
+  // };
 
   return (
     <>

@@ -63,7 +63,7 @@ export const DbRouter = createTRPCRouter({
           await addDieRolls(dieRolls ?? []);
 
           async function addPlayers(players: Player[]) {
-            players.forEach(async (player) => {
+            players.map(async (player) => {
               await DB.players.upsert({
                 where: {
                   charName: player.charName,
@@ -75,7 +75,7 @@ export const DbRouter = createTRPCRouter({
           }
 
           async function addRooms(rooms: Room[]) {
-            rooms.forEach(async (room) => {
+            rooms.map(async (room) => {
               await DB.rooms.upsert({
                 where: {
                   id: room.id,
@@ -87,7 +87,7 @@ export const DbRouter = createTRPCRouter({
           }
 
           async function addDieRolls(dieRolls: DieRoll[]) {
-            dieRolls.forEach(async (dieRoll) => {
+            dieRolls.map(async (dieRoll) => {
               const createdDate = new Date(dieRoll.created);
               if (createdDate <= new Date("2023-10-30")) return;
 
