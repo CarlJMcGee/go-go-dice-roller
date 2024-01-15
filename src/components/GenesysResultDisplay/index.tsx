@@ -5,13 +5,13 @@ import type { useGenesysResult } from "../../utils/go-dice-genesys-hooks";
 interface GenesysResultDisplayProps {
   genesys: ReturnType<typeof useGenesysResult>;
   roomId: string;
-  userId: string;
+  playerId: string;
 }
 
 export default function GenesysResultDisplay({
   genesys,
   roomId,
-  userId,
+  playerId,
 }: GenesysResultDisplayProps) {
   const { mutate: sendRoom } = trpc.dieRoll.add.useMutation();
   const [timerFlag, setTimerFlag] = useState(false);
@@ -38,7 +38,7 @@ export default function GenesysResultDisplay({
                 genesys.sideEffects,
               ].join(" "),
               roomId: roomId,
-              userId: userId,
+              playerId: playerId,
             });
 
             setTimerFlag(true);

@@ -15,7 +15,7 @@ const DiceRoll: React.FC<DiceRollProps> = ({ rolls: rollsRaw }) => {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
   function getPlayersFromRolls(rolls: DieRollFull[]) {
-    const playersSet = SetPlus(rolls.map((roll) => roll.user.playerName));
+    const playersSet = SetPlus(rolls.map((roll) => roll.player.playerName));
     return playersSet.toArr();
   }
 
@@ -26,7 +26,7 @@ const DiceRoll: React.FC<DiceRollProps> = ({ rolls: rollsRaw }) => {
     }
 
     setRolls(
-      rollsRaw.filter((roll) => roll.user.playerName === selectedPlayer)
+      rollsRaw.filter((roll) => roll.player.playerName === selectedPlayer)
     );
   }, [selectedPlayer, rollsRaw]);
 

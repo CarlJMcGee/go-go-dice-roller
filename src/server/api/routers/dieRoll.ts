@@ -2,10 +2,11 @@ import type { DieRoll } from "@prisma/client";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { triggerEvent } from "../../../utils/pusher-store";
+import dayjs from "dayjs";
 
 export const dieRollRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.prisma.dieRoll.findMany({});
+    return await ctx.DB.dieRolls.findMany({});
   }),
   inRoom: publicProcedure
     .input(
@@ -14,7 +15,7 @@ export const dieRollRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.dieRoll.findMany({
+      return ctx.DB.dieRolls.findMany({
         where: {
           roomId: input.roomId,
         },
@@ -22,7 +23,7 @@ export const dieRollRouter = createTRPCRouter({
           created: "desc",
         },
         include: {
-          user: {
+          player: {
             select: {
               playerName: true,
               charName: true,
@@ -36,36 +37,29 @@ export const dieRollRouter = createTRPCRouter({
     .input(
       z.object({
         outcome: z.string(),
-        userId: z.string(),
+        playerId: z.string(),
         roomId: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      if (input.outcome.includes("Success")) {
-        input.outcome = input.outcome.replace("Success", "Succ");
-      }
-      if (input.outcome.includes("Failure")) {
-        input.outcome = input.outcome.replace("Failure", "Fail");
-      }
-      if (input.outcome.includes("Advantage")) {
-        input.outcome = input.outcome.replace("Advantage", "Adv");
-      }
-      if (input.outcome.includes("Disadvantage")) {
-        input.outcome = input.outcome.replace("Disadvantage", "Dis");
-      }
-      if (input.outcome.includes("Triumphant")) {
-        input.outcome = input.outcome.replace("Triumphant", "Trph");
-      }
-      if (input.outcome.includes("Despairing")) {
-        input.outcome = input.outcome.replace("Despairing", "Despr");
-      }
+    .mutation(async ({ ctx: { DB }, input }) => {
+      await DB.dieRolls.deleteMany({
+        where: {
+          roomId: input.roomId,
+          created: {
+            lte: dayjs().subtract(90, "days").toISOString(),
+          },
+        },
+      });
 
-      const newRoll: DieRoll = await ctx.prisma.dieRoll.create({
+      concatOutcome(input);
+
+      const newRoll: DieRoll = await DB.dieRolls.create({
         data: {
           ...input,
+          DBid: DB.id,
         },
         include: {
-          user: {
+          player: {
             select: {
               charName: true,
               playerName: true,
@@ -80,3 +74,28 @@ export const dieRollRouter = createTRPCRouter({
       return { msg: `roll of ${newRoll.outcome}` };
     }),
 });
+
+function concatOutcome(input: {
+  roomId: string;
+  outcome: string;
+  playerId: string;
+}) {
+  if (input.outcome.includes("Success")) {
+    input.outcome = input.outcome.replace("Success", "Succ");
+  }
+  if (input.outcome.includes("Failure")) {
+    input.outcome = input.outcome.replace("Failure", "Fail");
+  }
+  if (input.outcome.includes("Advantage")) {
+    input.outcome = input.outcome.replace("Advantage", "Adv");
+  }
+  if (input.outcome.includes("Disadvantage")) {
+    input.outcome = input.outcome.replace("Disadvantage", "Dis");
+  }
+  if (input.outcome.includes("Triumphant")) {
+    input.outcome = input.outcome.replace("Triumphant", "Trph");
+  }
+  if (input.outcome.includes("Despairing")) {
+    input.outcome = input.outcome.replace("Despairing", "Despr");
+  }
+}

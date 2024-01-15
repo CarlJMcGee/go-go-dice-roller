@@ -8,7 +8,7 @@ interface DiceProps {
   diceStyle: DiceStyles;
   die: Die;
   index: number;
-  userId: string;
+  playerId: string;
   roomId: string;
   removeDie: (dieId: string) => void;
   inputResult: (values: genDieFaces[]) => void;
@@ -19,7 +19,7 @@ export default function Dice({
   diceStyle,
   die,
   index: i,
-  userId,
+  playerId,
   roomId,
   removeDie,
   inputResult,
@@ -30,7 +30,7 @@ export default function Dice({
       key={die.id}
       die={die}
       index={i}
-      userId={userId}
+      playerId={playerId}
       roomId={roomId}
       removeDie={removeDie}
     />
@@ -42,7 +42,7 @@ export default function Dice({
       inputResult={inputResult}
       setRolled={setRolled}
       removeDie={removeDie}
-      sess={[roomId, userId]}
+      sess={[roomId, playerId]}
     />
   ) : null;
 }

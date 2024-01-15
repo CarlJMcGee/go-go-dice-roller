@@ -7,7 +7,7 @@ import { pusherServer, triggerEvent } from "../../../utils/pusher-store";
 
 export const userRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.prisma.user.findMany({
+    return await ctx.DB.players.findMany({
       orderBy: {
         charName: "asc",
       },
@@ -24,7 +24,7 @@ export const userRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.prisma.user.findMany({
+      return await ctx.DB.players.findMany({
         where: {
           roomId: input.roomId,
           loggedIn: true,
@@ -47,12 +47,13 @@ export const userRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.user.upsert({
+      return await ctx.DB.players.upsert({
         where: {
           charName: input.charName,
         },
         create: {
           ...input,
+          DBid: "gogo-dice-roller",
         },
         update: {},
       });
@@ -60,17 +61,17 @@ export const userRouter = createTRPCRouter({
   getOne: publicProcedure
     .input(
       z.object({
-        userId: z.string().optional(),
+        playerId: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      if (!input.userId) {
+      if (!input.playerId) {
         return null;
       }
 
-      return await ctx.prisma.user.findFirstOrThrow({
+      return await ctx.DB.players.findFirstOrThrow({
         where: {
-          id: input.userId,
+          id: input.playerId,
         },
         include: {
           room: {
@@ -95,7 +96,7 @@ export const userRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.prisma.user.update({
+      const user = await ctx.DB.players.update({
         where: {
           id: input.userId,
         },
@@ -121,7 +122,7 @@ export const userRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.prisma.user.update({
+      const user = await ctx.DB.players.update({
         where: {
           id: input.userId,
         },

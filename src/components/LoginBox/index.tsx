@@ -1,6 +1,6 @@
 import { Autocomplete } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import type { Room, User } from "@prisma/client";
+import type { Player, Room, User } from "@prisma/client";
 import Link from "next/link";
 import * as React from "react";
 import { useEffect, useState } from "react";
@@ -12,8 +12,8 @@ export default function LoginBox() {
   // state
   const [roomName, setRoomName] = useState("");
   const [room, setRoom] = useState<Room | undefined>();
-  const [character, setChar] = useState<User | undefined>();
-  const [characters, setCharacters] = useState<User[] | undefined>();
+  const [character, setChar] = useState<Player | undefined>();
+  const [characters, setCharacters] = useState<Player[] | undefined>();
 
   // queries & mutations
   const { mutate: addRoom } = trpc.room.add.useMutation({
@@ -78,7 +78,7 @@ export default function LoginBox() {
 
   return (
     <div className="rounded-md bg-slate-400 md:h-1/2 md:w-2/6">
-      <h3 className="my-3 mx-3 text-center text-3xl text-white underline">
+      <h3 className="mx-3 my-3 text-center text-3xl text-white underline">
         Login to Game Session
       </h3>
       <div className="flex flex-col items-center">

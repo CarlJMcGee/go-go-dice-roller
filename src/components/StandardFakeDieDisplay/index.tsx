@@ -79,7 +79,7 @@ export default function StandardFakeDieDisplay({
       return;
     }
 
-    sendRoll({ outcome: value, roomId: sess[0], userId: sess[1] });
+    sendRoll({ outcome: value, roomId: sess[0], playerId: sess[1] });
   }, [value]);
 
   return (
@@ -117,7 +117,7 @@ export default function StandardFakeDieDisplay({
           <select
             name="dieType"
             id="dieType"
-            className={`border-2 bg-transparent bg-black bg-opacity-20 ${borderColor[dieColor]} hover:bg-black hover:bg-opacity-30`}
+            className={`border-2 bg-black bg-transparent bg-opacity-20 ${borderColor[dieColor]} hover:bg-black hover:bg-opacity-30`}
             onChange={(e) => setDieType(e.target.value as DieTypes)}
           >
             <option value="D6" defaultChecked>

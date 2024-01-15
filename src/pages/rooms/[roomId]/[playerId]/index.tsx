@@ -7,7 +7,7 @@ import { trpc } from "../../../../utils/api";
 import { useDiceSet } from "../../../../utils/go-dice-react";
 import { useGenesysResult } from "../../../../utils/go-dice-genesys-hooks";
 import Head from "next/head";
-import type { User } from "@prisma/client";
+import type { Player, User } from "@prisma/client";
 import PusherClient from "pusher-js";
 import Link from "next/link";
 import { ActionIcon, Menu, Select } from "@mantine/core";
@@ -26,16 +26,16 @@ const RoomSession = () => {
   const router = useRouter();
   type RoomSessParams = ParsedUrlQuery & {
     roomId: string;
-    userId: string;
+    playerId: string;
   };
-  const { roomId, userId } = router.query as RoomSessParams;
+  const { roomId, playerId } = router.query as RoomSessParams;
 
   // state
   const [diceStyle, saveDiceStyle] = useLocalStorage<DiceStyles>({
     key: "diceStyle",
     defaultValue: "standard",
   });
-  const [membersList, updateMembers] = useState<User[]>([]);
+  const [membersList, updateMembers] = useState<Player[]>([]);
   const [partyRolls, setPartyRolls] = useState<DieRollFull[]>([]);
   const [diceMenu, setDiceMenu] = useState(false);
   const [rollAllState, rollAll] = useAtom(RollAllAtom);
@@ -57,7 +57,7 @@ const RoomSession = () => {
   );
   const { data: player, isLoading: userLoading } = trpc.user.getOne.useQuery(
     {
-      userId: userId,
+      playerId: playerId,
     },
     {
       retry: 3,
@@ -105,7 +105,7 @@ const RoomSession = () => {
       userAuthentication: {
         endpoint: "/api/pusher/user-auth",
         transport: "ajax",
-        headers: { userid: userId },
+        headers: { userid: playerId },
       },
     });
 
@@ -117,12 +117,12 @@ const RoomSession = () => {
     });
     sub.bind(
       "pusher:subscription_succeeded",
-      (data: { members: { [s: string]: User } }) => {
+      (data: { members: { [s: string]: Player } }) => {
         updateMembers([...Object.values(data.members)]);
       }
     );
     sub.bind("pusher:member_added", (data: Member) => {
-      if (membersList.find((user) => user.id === data.id)) {
+      if (membersList.find((player) => player.id === data.id)) {
         return;
       }
       updateMembers((members) => [...members, data.info]);
@@ -195,7 +195,7 @@ const RoomSession = () => {
           <h3 className="text-3xl underline">Characters</h3>
           <ol>
             {membersList.length > 0 &&
-              membersList.map((member: User) => (
+              membersList.map((member) => (
                 <li key={member.id}>
                   <h3>{member.charName}</h3>
                 </li>
@@ -226,7 +226,7 @@ const RoomSession = () => {
           <GenesysResultDisplay
             genesys={genesys}
             roomId={roomId}
-            userId={userId}
+            playerId={playerId}
           />
           {/* dice */}
           <div className="flex justify-between p-2">
@@ -252,7 +252,7 @@ const RoomSession = () => {
                 diceStyle={diceStyle}
                 die={die}
                 index={i}
-                userId={userId}
+                playerId={playerId}
                 roomId={roomId}
                 inputResult={genesys.inputResult}
                 removeDie={removeDie}
@@ -269,7 +269,7 @@ const RoomSession = () => {
                 setRolled={genesys.setRolled}
                 diceStyle={diceStyle}
                 removeDie={removeFakeDie}
-                sess={[roomId, userId]}
+                sess={[roomId, playerId]}
               />
             ))}
             {/* add die button  */}

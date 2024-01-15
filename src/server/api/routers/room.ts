@@ -4,7 +4,7 @@ import { publicProcedure, createTRPCRouter } from "../trpc";
 
 export const roomRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.prisma.room.findMany({});
+    return await ctx.DB.rooms.findMany({});
   }),
   getOne: publicProcedure
     .input(
@@ -17,7 +17,7 @@ export const roomRouter = createTRPCRouter({
         return null;
       }
 
-      return await ctx.prisma.room.findUniqueOrThrow({
+      return await ctx.DB.rooms.findUniqueOrThrow({
         where: {
           id: input.roomId,
         },
@@ -32,7 +32,7 @@ export const roomRouter = createTRPCRouter({
           dieRolls: {
             orderBy: { created: "desc" },
             include: {
-              user: {
+              player: {
                 select: {
                   charName: true,
                   playerName: true,
@@ -51,12 +51,13 @@ export const roomRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.room.upsert({
+      return await ctx.DB.rooms.upsert({
         where: {
           name: input.name,
         },
         create: {
           name: input.name,
+          DBid: "gogo-dice-roller",
         },
         update: {},
         include: {
@@ -71,7 +72,7 @@ export const roomRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.room.findMany({
+      return ctx.DB.rooms.findMany({
         where: {
           name: {
             startsWith: input.search,

@@ -12,30 +12,126 @@ datasource db {
 }
 
 model User {
-    id         String    @id @default(cuid())
-    createdAt  DateTime  @default(now())
-    updatedAt  DateTime  @updatedAt
-    loggedIn   Boolean   @default(false)
+    id             String    @id @default(cuid())
+    name           String?
+    role           String    @default("user")
+    email          String?   @unique
+    emailVerified  DateTime?
+    image          String?
+    movies         Movie[]
+    playerAccounts Player[]
+    accounts       Account[]
+    sessions       Session[]
+}
+
+// Multiplayer Dice Roller App
+model DiceRoller {
+    id       String    @id @default(cuid())
+    name     String    @unique
+    Players  Player[]
+    Rooms    Room[]
+    DieRolls DieRoll[]
+}
+
+model Player {
+    DBid       String
+    DB         DiceRoller @relation(fields: [DBid], references: [id])
+    id         String     @id @default(cuid())
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+    loggedIn   Boolean    @default(false)
     playerName String
-    charName   String    @unique
+    charName   String     @unique
+    userId     String?
+    user       User?      @relation(fields: [userId], references: [id])
     roomId     String
-    room       Room      @relation(fields: [roomId], references: [id])
+    room       Room       @relation(fields: [roomId], references: [id])
     dieRolls   DieRoll[]
 }
 
 model Room {
-    id       String    @id @default(cuid())
-    name     String    @unique
-    players  User[]
+    DBid     String
+    DB       DiceRoller @relation(fields: [DBid], references: [id])
+    id       String     @id @default(cuid())
+    name     String     @unique
+    players  Player[]
     dieRolls DieRoll[]
 }
 
 model DieRoll {
-    id      String   @id @default(cuid())
-    outcome String
-    userId  String
-    user    User     @relation(fields: [userId], references: [id])
-    roomId  String
-    room    Room     @relation(fields: [roomId], references: [id])
-    created DateTime @default(now())
+    DBid     String
+    DB       DiceRoller @relation(fields: [DBid], references: [id])
+    id       String     @id @default(cuid())
+    outcome  String
+    playerId String
+    player   Player     @relation(fields: [playerId], references: [id])
+    roomId   String
+    room     Room       @relation(fields: [roomId], references: [id])
+    created  DateTime   @default(now())
+}
+
+// Movie Picker App
+model MoviePicker {
+    id     String  @id @default(cuid())
+    name   String  @unique
+    Movies Movie[]
+}
+
+model Movie {
+    DBId      String
+    DB        MoviePicker @relation(fields: [DBId], references: [id], onDelete: Cascade)
+    id        String      @id @default(cuid())
+    Title     String      @db.Text
+    Year      String
+    Rated     String
+    Released  String
+    Runtime   String
+    Genre     String
+    Director  String      @db.Text
+    Plot      String      @db.Text
+    Language  String
+    Poster    String
+    Metascore String
+    imdbID    String      @unique
+    available Boolean     @default(false)
+    votes     Int         @default(0)
+    winner    Boolean     @default(false)
+    dateAdded DateTime    @default(now())
+    userId    String
+    addedBy   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Necessary for Next auth
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
 }

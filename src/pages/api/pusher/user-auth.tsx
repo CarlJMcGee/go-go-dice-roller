@@ -22,17 +22,17 @@ async function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
     userid: string;
   };
 
-  const user = await prisma?.user.findUnique({
+  const player = await prisma?.player.findUnique({
     where: {
       id: userid,
     },
   });
 
-  const userData = {
+  const playerData = {
     id: userid,
-    user_info: user,
+    user_info: player,
   };
 
-  const auth = pusherServer.authenticateUser(socket_id, userData);
+  const auth = pusherServer.authenticateUser(socket_id, playerData);
   res.status(200).send(auth);
 }

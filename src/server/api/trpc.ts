@@ -31,9 +31,21 @@ type CreateContextOptions = Record<string, never>;
  * - trpc's `createSSGHelpers` where we don't have req/res
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
-const createInnerTRPCContext = (_opts: CreateContextOptions) => {
+const createInnerTRPCContext = async (_opts: CreateContextOptions) => {
+  const { id, name } = await prisma.diceRoller.findFirstOrThrow({
+    where: { name: "gogo-dice-roller" },
+  });
+
+  const DB = {
+    id: id,
+    name: name,
+    players: prisma.player,
+    rooms: prisma.room,
+    dieRolls: prisma.dieRoll,
+    prisma: prisma,
+  };
   return {
-    prisma,
+    DB,
   };
 };
 

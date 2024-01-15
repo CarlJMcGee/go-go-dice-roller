@@ -17,7 +17,7 @@ import rollingGif from "../../media/dice-roll.gif";
 export interface IDieDisplayProps {
   die: Die;
   index: number;
-  userId: string;
+  playerId: string;
   roomId: string;
   removeDie: (dieId: string) => void;
 }
@@ -42,7 +42,7 @@ const bgColorMap = MapPlus<string, string>([
 export default function DieDisplay({
   die,
   index: i,
-  userId,
+  playerId,
   roomId,
   removeDie,
 }: IDieDisplayProps) {
@@ -70,7 +70,7 @@ export default function DieDisplay({
   }, [connected]);
 
   useEffect(() => {
-    sendRoll({ outcome: value, roomId: roomId, userId: userId });
+    sendRoll({ outcome: value, roomId: roomId, playerId: playerId });
   }, [value]);
 
   return (
@@ -110,7 +110,7 @@ export default function DieDisplay({
         <select
           name="dieType"
           id="dieType"
-          className={`border-2 bg-transparent bg-black bg-opacity-20 ${
+          className={`border-2 bg-black bg-transparent bg-opacity-20 ${
             dieColor && (borderColorMap.get(dieColor) ?? "")
           } hover:bg-black hover:bg-opacity-30`}
           onChange={(e) => setDieType(e.target.value as DieTypes)}

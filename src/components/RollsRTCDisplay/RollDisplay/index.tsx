@@ -35,10 +35,10 @@ const RollDisplay: React.FC<RollDisplayProps> = ({ roll }) => {
           : "bg-[#00b4ff]"
       } bg-opacity-75`}
     >
-      <h3 className="mt-3 ml-3 text-2xl">{roll.user.playerName}</h3>
+      <h3 className="ml-3 mt-3 text-2xl">{roll.player.playerName}</h3>
       <div className="mb-4 flex items-center justify-center gap-1">
         <p className="mr-3 text-center text-xl">
-          {roll.user.charName} Rolled a
+          {roll.player.charName} Rolled a
           {!symbol && (
             <span className="text-3xl font-bold"> {roll.outcome}</span>
           )}
