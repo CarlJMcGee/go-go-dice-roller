@@ -6,8 +6,8 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { pusherServer, triggerEvent } from "../../../utils/pusher-store";
 
 export const userRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.DB.players.findMany({
+  getAll: publicProcedure.query(async ({ ctx: { DB } }) => {
+    return await DB.players.findMany({
       orderBy: {
         charName: "asc",
       },
@@ -23,8 +23,8 @@ export const userRouter = createTRPCRouter({
         roomId: z.string(),
       })
     )
-    .query(async ({ ctx, input }) => {
-      return await ctx.DB.players.findMany({
+    .query(async ({ ctx: { DB }, input }) => {
+      return await DB.players.findMany({
         where: {
           roomId: input.roomId,
           loggedIn: true,
@@ -46,14 +46,14 @@ export const userRouter = createTRPCRouter({
         roomId: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.DB.players.upsert({
+    .mutation(async ({ ctx: { DB }, input }) => {
+      return await DB.players.upsert({
         where: {
           charName: input.charName,
         },
         create: {
           ...input,
-          DBid: "gogo-dice-roller",
+          DBid: DB.id,
         },
         update: {},
       });
@@ -64,12 +64,12 @@ export const userRouter = createTRPCRouter({
         playerId: z.string().optional(),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx: { DB }, input }) => {
       if (!input.playerId) {
         return null;
       }
 
-      return await ctx.DB.players.findFirstOrThrow({
+      return await DB.players.findFirstOrThrow({
         where: {
           id: input.playerId,
         },
@@ -95,8 +95,8 @@ export const userRouter = createTRPCRouter({
         socket_id: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      const user = await ctx.DB.players.update({
+    .mutation(async ({ ctx: { DB }, input }) => {
+      const user = await DB.players.update({
         where: {
           id: input.userId,
         },
@@ -121,8 +121,8 @@ export const userRouter = createTRPCRouter({
         userId: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      const user = await ctx.DB.players.update({
+    .mutation(async ({ ctx: { DB }, input }) => {
+      const user = await DB.players.update({
         where: {
           id: input.userId,
         },

@@ -161,7 +161,6 @@ export function useGenesysDie(die: Die, dieType: genDieTypes) {
       setGenValue(dieValueHandler(value));
     }
 
-    // @ts-ignore
     return () => die.off("value", onValue);
   }, [value]);
 

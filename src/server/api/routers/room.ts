@@ -57,7 +57,7 @@ export const roomRouter = createTRPCRouter({
         },
         create: {
           name: input.name,
-          DBid: "gogo-dice-roller",
+          DBid: ctx.DB.id,
         },
         update: {},
         include: {

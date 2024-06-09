@@ -5,9 +5,20 @@ import { triggerEvent } from "../../../utils/pusher-store";
 import dayjs from "dayjs";
 
 export const dieRollRouter = createTRPCRouter({
+  /**
+   * Retrieves all die rolls from the database.
+   *
+   * @returns An array of all die roll objects.
+   */
   getAll: publicProcedure.query(async ({ ctx }) => {
     return await ctx.DB.dieRolls.findMany({});
   }),
+  /**
+   * Retrieves all die rolls for the specified room, ordered by the most recent first, and includes the player information.
+   *
+   * @param roomId - The ID of the room to retrieve die rolls for.
+   * @returns An array of die roll objects, each containing the player's name, character name, and player ID.
+   */
   inRoom: publicProcedure
     .input(
       z.object({
@@ -33,6 +44,14 @@ export const dieRollRouter = createTRPCRouter({
         },
       });
     }),
+  /**
+   * Adds a new die roll to the database and triggers a Pusher event to notify clients.
+   *
+   * @param outcome - The outcome of the die roll.
+   * @param playerId - The ID of the player who rolled the die.
+   * @param roomId - The ID of the room where the die roll occurred.
+   * @returns An object with a message indicating the outcome of the die roll.
+   */
   add: publicProcedure
     .input(
       z.object({
@@ -75,6 +94,14 @@ export const dieRollRouter = createTRPCRouter({
     }),
 });
 
+/**
+ * Concats the outcome string to shorten certain outcome descriptions.
+ * @param input - An object containing the room ID, outcome, and player ID.
+ * @param input.roomId - The ID of the room where the die roll occurred.
+ * @param input.outcome - The outcome of the die roll.
+ * @param input.playerId - The ID of the player who rolled the die.
+ * @returns void
+ */
 function concatOutcome(input: {
   roomId: string;
   outcome: string;

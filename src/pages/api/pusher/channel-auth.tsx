@@ -12,6 +12,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
+/**
+ * Authorizes a Pusher channel for the given socket ID and channel name.
+ *
+ * @param req - The NextJS API request object.
+ * @param res - The NextJS API response object.
+ * @returns The Pusher channel authorization response.
+ */
 function pusherAuth(req: NextApiRequest, res: NextApiResponse) {
   const { socket_id, channel_name } = req.body as {
     socket_id: string;
